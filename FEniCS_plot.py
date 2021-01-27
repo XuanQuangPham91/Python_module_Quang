@@ -2,61 +2,69 @@
 ''' visualization  '''
 from dolfin import plot
 import matplotlib.pyplot as plt
-import os
+# import os
 
 # print(os.getcwd())
 
 #------------------------------------------------------------------------------
 '''FEniCS plot '''
 
+# def FEniCS_plot_noneMode(
+#     number_of_figure,
+#     u,
+#     title,
+#     reduced_problem=None,
+#     savefig=None,
+# ):
+#     if reduced_problem == 'reduced_problem':
+#         # u = reduced_problem
+#         p = plot(u, reduced_problem=reduced_problem, title=title)
+#     elif reduced_problem == None:
+#         p = plot(u, title='%s' % title)
+#     plt.figure(number_of_figure)
+#     plt.colorbar(p)
+#     # plt.axis('tight')
+#     # plt.legend()
+#     plt.grid(True)
+#     plt.title(title)
+#     plt.xlabel('$x$')
+#     plt.ylabel('$y$')
+#     if savefig == True:
+#         plt.savefig('solution/%s.png' % title, format='png')
+#     else:
+#         pass
 
-def my_FEniCS_plot(
-    number_of_figure,
-    u,
-    title,
-    reduced_problem=None,
-    savefig=None,
-):
-    if reduced_problem == 'reduced_problem':
-        # u = reduced_problem
-        p = plot(u, reduced_problem=reduced_problem, title=title)
-    elif reduced_problem == 'False':
-        p = plot(u, title='%s' % title)
-    plt.figure(number_of_figure)
-    plt.colorbar(p)
-    # plt.axis('tight')
-    # plt.legend()
-    plt.grid(True)
-    plt.title(title)
-    plt.xlabel('$x$')
-    plt.ylabel('$y$')
-    if savefig == 'True':
-        plt.savefig('20210118_RB_results/%s.png' % title, format='png')
-    else:
+
+def FEniCS_plot_mode(u,
+                     title,
+                     mode="glyphs",
+                     number_of_figure=None,
+                     reduced_problem=None,
+                     savefig=None,
+                     grid=None):
+    if number_of_figure == None:
         pass
-
-
-def my_FEniCS_plot_mode(number_of_figure,
-                        u,
-                        title,
-                        mode,
-                        reduced_problem=None,
-                        savefig=None):
+    elif number_of_figure == True:
+        plt.figure()
+    else:
+        plt.figure(number_of_figure)
     if reduced_problem == 'reduced_problem':
         # u = reduced_problem
         p = plot(u, reduced_problem=reduced_problem, title=title, mode=mode)
-    elif reduced_problem == 'False':
+    elif reduced_problem == None:
         p = plot(u, title='%s' % title, mode=mode)
-    plt.figure(number_of_figure)
     # plt.axis('tight')
     # plt.legend()
-    plt.grid(True)
+    if grid == True:
+        plt.grid(True)
+    else:
+        pass
     plt.title(title)
     plt.xlabel('$x$')
     plt.ylabel('$y$')
     plt.colorbar(p)
-    if savefig == 'True':
-        plt.savefig('20210118_RB_results/%s.png' % title, format='png')
+    if savefig == True:
+        plt.savefig('solution/%s.png' % title, format='png')
     else:
         pass
 
