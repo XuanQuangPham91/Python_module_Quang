@@ -47,7 +47,7 @@ def my_FEniCS_plot(number_of_figure, u, title):
     plt.title(title)
     plt.xlabel('$y_1$')
     plt.ylabel('$y_2$')
-    plt.savefig('solution/%s.png' % title, format='png')
+    plt.savefig('solution/%s' % title, format='eps')
 
 
 def my_FEniCS_plot_mode(number_of_figure, u, title, mode):
@@ -59,4 +59,4 @@ def my_FEniCS_plot_mode(number_of_figure, u, title, mode):
     plt.title(title)
     plt.xlabel('$y_1$')
     plt.ylabel('$y_2$')
-    plt.savefig('solution/%s.png' % title, format='png')
+    plt.savefig('solution/%s' % title, format='eps')
