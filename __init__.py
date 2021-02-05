@@ -1,3 +1,5 @@
+""" FEniCS auxiliary funcions """
+
 try:
     from .FEniCS_module.FEniCS_plot import FEniCS_plot_mode
 except:
