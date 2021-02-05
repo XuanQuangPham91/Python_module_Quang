@@ -1,4 +1,5 @@
 from dolfin import *
+import numpy as np
 import matplotlib.pyplot as plt
 
 
@@ -35,28 +36,47 @@ def Load_HDF5(V, mesh, title=None):
     return U
 
 
-'''FEniCS plot '''
+# '''FEniCS plot '''
+
+# def my_FEniCS_plot(number_of_figure, u, title):
+#     plt.figure(number_of_figure)
+#     plt.colorbar(plot(u, title='%s' % title))
+#     # plt.axis('tight')
+#     # plt.legend()
+#     # plt.grid(True)
+#     plt.title(title)
+#     plt.xlabel('$y_1$')
+#     plt.ylabel('$y_2$')
+#     plt.savefig('solution/%s' % title, format='eps')
+
+# def my_FEniCS_plot_mode(number_of_figure, u, title, mode):
+#     plt.figure(number_of_figure)
+#     plt.colorbar(plot(u, title='%s' % title, mode=mode))
+#     # plt.axis('tight')
+#     # plt.legend()
+#     # plt.grid(True)
+#     plt.title(title)
+#     plt.xlabel('$y_1$')
+#     plt.ylabel('$y_2$')
+#     plt.savefig('solution/%s' % title, format='eps')
+""" saving files """
 
 
-def my_FEniCS_plot(number_of_figure, u, title):
-    plt.figure(number_of_figure)
-    plt.colorbar(plot(u, title='%s' % title))
-    # plt.axis('tight')
-    # plt.legend()
-    # plt.grid(True)
-    plt.title(title)
-    plt.xlabel('$y_1$')
-    plt.ylabel('$y_2$')
-    plt.savefig('solution/%s' % title, format='eps')
+def save_txt(u, title):
+    """ saving files """
+    coor = mesh.coordinates()
+    u_text = []
+    u_array = u.vector().get_local()
+    print("len %s:%d" % (title, len(u_array)))
 
+    # for i in range(len(u_array)):
+    #     u_temp = (coor[i][0], coor[i][1], u_array[i])
+    #     print("u(%8g,%8g) = %g" % (coor[i][0], coor[i][1], u_array[i]))
+    #     u_text.append(coor[i][0])
 
-def my_FEniCS_plot_mode(number_of_figure, u, title, mode):
-    plt.figure(number_of_figure)
-    plt.colorbar(plot(u, title='%s' % title, mode=mode))
-    # plt.axis('tight')
-    # plt.legend()
-    # plt.grid(True)
-    plt.title(title)
-    plt.xlabel('$y_1$')
-    plt.ylabel('$y_2$')
-    plt.savefig('solution/%s' % title, format='eps')
+    np.savetxt(
+        "solution/%s.txt" % title,
+        np.array(u11.vector().get_local()),
+        #    fmt="%s",
+    )
+    # np.savetxt("results/periodic_u11_coordinate.txt", np.array(coor))

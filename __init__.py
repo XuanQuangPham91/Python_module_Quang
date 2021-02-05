@@ -5,7 +5,7 @@ except:
 
 try:
     from .FEniCS_module.FEniCS_save_load_solution import \
-        Save_XDMF, Save_HDF5, \
+        Save_XDMF, Save_HDF5, save_txt, \
         Load_HDF5, Load_XDMF
 except:
     print('Failed to import FEniCS_save_load_solution')

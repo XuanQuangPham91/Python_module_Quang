@@ -2,6 +2,8 @@
 ''' visualization  '''
 from dolfin import plot
 import matplotlib.pyplot as plt
+from numpy.lib.shape_base import tile
+from .FEniCS_save_load_solution import save_txt
 # import os
 
 # print(os.getcwd())
@@ -35,23 +37,28 @@ import matplotlib.pyplot as plt
 #         pass
 
 
-def FEniCS_plot_mode(u,
-                     title,
-                     mode="glyphs",
-                     number_of_figure=None,
-                     reduced_problem=None,
-                     savefig=None,
-                     grid=None):
+def FEniCS_plot_mode(
+    u,
+    title,
+    format="png",
+    mode=None,
+    number_of_figure=None,
+    savefig=None,
+    savefiletxt=None,
+    grid=None,
+):
+    """
+    mode=None, "glyphs", "displacement",
+    """
     if number_of_figure == None:
         pass
     elif number_of_figure == True:
         plt.figure()
     else:
         plt.figure(number_of_figure)
-    if reduced_problem == 'reduced_problem':
-        # u = reduced_problem
-        p = plot(u, reduced_problem=reduced_problem, title=title, mode=mode)
-    elif reduced_problem == None:
+    if mode == None:
+        p = plot(u, title='%s' % title)
+    else:
         p = plot(u, title='%s' % title, mode=mode)
     # plt.axis('tight')
     # plt.legend()
@@ -64,7 +71,11 @@ def FEniCS_plot_mode(u,
     plt.ylabel('$y$')
     plt.colorbar(p)
     if savefig == True:
-        plt.savefig('solution/%s.png' % title, format='png')
+        plt.savefig('solution/%s.%s' % (title, format), format='%s' % format)
+    else:
+        pass
+    if savefiletxt == True:
+        save_txt(u, title=title)
     else:
         pass
 
