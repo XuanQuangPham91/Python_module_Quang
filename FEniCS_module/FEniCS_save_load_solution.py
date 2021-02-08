@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def Save_XDMF(V, title):
+def save_XDMF(V, title):
     U = Function(V)
     # input_file = XDMFFile(mesh.mpi_comm(), "solution/RB/%s.xdmf" % title)
     input_file = XDMFFile("solution/%s.xdmf" % title)
@@ -11,7 +11,7 @@ def Save_XDMF(V, title):
     input_file.close()
 
 
-def Load_XDMF(V, title):
+def load_XDMF(V, title):
     U = Function(V)
     # input_file = XDMFFile(mesh.mpi_comm(), "solution/RB/%s.xdmf" % title)
     input_file = XDMFFile("solution/%s.xdmf" % title)
@@ -20,14 +20,14 @@ def Load_XDMF(V, title):
     return U
 
 
-def Save_HDF5(u, mesh, title=None):
+def save_HDF5(u, mesh, title=None):
     output_file = HDF5File(mesh.mpi_comm(), "solution/%s.h5" % title, "w")
     # input_file = HDF5File("solution/%s.h5" % title, "r")
     output_file.write(u, "solution")
     output_file.close()
 
 
-def Load_HDF5(V, mesh, title=None):
+def load_HDF5(V, mesh, title=None):
     U = Function(V)
     input_file = HDF5File(mesh.mpi_comm(), "solution/%s.h5" % title, "r")
     # input_file = HDF5File("solution/%s.h5" % title, "r")

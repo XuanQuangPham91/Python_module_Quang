@@ -25,7 +25,7 @@ import numpy
 from dolfin import *
 import matplotlib.pyplot as plt
 plt.jet()
-import Python_module_Quang
+from Python_module_Quang import *
 
 
 class Quadratic2D(UserExpression):
@@ -40,6 +40,7 @@ class Quadratic3D(UserExpression):
 
 def test_functional2D():
     """Test integration of function interpolated in non-matching meshes"""
+    """LagrangeInterpolator.interpolate(u_project, u_base)"""
 
     f = Quadratic2D(degree=2)
 
@@ -56,25 +57,31 @@ def test_functional2D():
     mesh1 = UnitSquareMesh(31, 31)
     V1 = FunctionSpace(mesh1, "Lagrange", 2)
     u1 = Function(V1)
+    plt.figure(2)
+    title = "u1"
+    plot(u1, title=title)
+    plt.savefig('%s.png' % title, format='png')
 
     LagrangeInterpolator.interpolate(u1, u0)
     assert round(assemble(u0 * dx) - assemble(u1 * dx), 10) == 0
-    plt.figure(2)
-    title = "u0_31"
-    plot(u0, wireframe=True, title=title)
     plt.figure(3)
+    title = "u0_3"
+    plot(u0, wireframe=True, title=title)
+    plt.savefig('%s.png' % title, format='png')
+    plt.figure(4)
     title = "u1_31"
     plot(u1, title=title)
+    plt.savefig('%s.png' % title, format='png')
 
-    mesh1 = UnitSquareMesh(15, 15)
-    V1 = FunctionSpace(mesh1, "Lagrange", 2)
-    u1 = Function(V1)
-    LagrangeInterpolator.interpolate(u1, u0)
-    assert round(assemble(u0 * dx) - assemble(u1 * dx), 10) == 0
-    plt.figure(4)
-    title = "u0_15"
-    plot(u0, title=title)
-    plt.savefig('solution/%s.png' % title, format='png')
+    # mesh1 = UnitSquareMesh(15, 15)
+    # V1 = FunctionSpace(mesh1, "Lagrange", 2)
+    # u1 = Function(V1)
+    # LagrangeInterpolator.interpolate(u1, u0)
+    # assert round(assemble(u0 * dx) - assemble(u1 * dx), 10) == 0
+    # plt.figure(4)
+    # title = "u0_15"
+    # plot(u0, title=title)
+    # plt.savefig('%s.png' % title, format='png')
 
 
 def test_functional3D():

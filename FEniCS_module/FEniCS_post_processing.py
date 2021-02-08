@@ -58,3 +58,29 @@ def relative_error(u_e, u, space="VectorFunctionSpace"):
     e_W.vector()[:] = np.absolute(1 - (u_W.vector().get_local() /
                                        u_e_W.vector().get_local()))
     return e_W
+
+
+def cal_von_mises_stress(u, E, nu):
+    lambda_1 = E * nu / ((1.0 + nu) * (1.0 - 2.0 * nu))
+    lambda_2 = E / (2.0 * (1.0 + nu))
+
+    def epsilon(u):
+        return 0.5 * (grad(u) + grad(u).T)
+
+    def sigma(u):
+        return lambda_1 * div(u) * Identity(d) + 2 * lambda_2 * epsilon(u)
+
+    d = u.geometric_dimension()  # space dimension
+    s = sigma(u) - (1. / 3) * tr(sigma(u)) * Identity(d)  # deviatoric stress
+    von_mises = sqrt(3. / 2 * inner(s, s))
+    V_von_mises = FunctionSpace(mesh, 'P', 1)
+    von_mises_stress = project(von_mises, V_von_mises)
+    # plot(von_Mises, title='Stress intensity')
+    return von_mises_stress
+
+
+def cal_u_magnitude(u):
+    V_magnitude = FunctionSpace(mesh, 'P', 1)
+    u_magnitude = sqrt(inner(u, u))
+    u_magnitude = project(u_magnitude, V_magnitude)
+    return u_magnitude
