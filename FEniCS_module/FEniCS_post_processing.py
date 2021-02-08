@@ -79,7 +79,7 @@ def cal_von_mises_stress(u, E, nu):
     return von_mises_stress
 
 
-def cal_u_magnitude(u):
+def cal_u_magnitude(u, mesh):
     V_magnitude = FunctionSpace(mesh, 'P', 1)
     u_magnitude = sqrt(inner(u, u))
     u_magnitude = project(u_magnitude, V_magnitude)

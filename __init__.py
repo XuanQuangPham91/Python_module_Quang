@@ -1,6 +1,6 @@
+# ------------------------------------------------------------------------------
 """ FEniCS auxiliary funcions """
-
-from FEniCS_module.FEniCS_auxiliary_code import von_mises_stress
+# ------------------------------------------------------------------------------
 
 try:
     from .FEniCS_module.FEniCS_plot import FEniCS_plot_mode
@@ -40,3 +40,14 @@ try:
         cal_von_mises_stress)
 except:
     print('Failed to import FEniCS_auxiliary_code')
+
+# ------------------------------------------------------------------------------
+""" Quang auxiliary funcions """
+# ------------------------------------------------------------------------------
+try:
+    from .Quang_module.examples import (
+        # plotting
+        Plot_rel_error_norm,
+        plot_convergence)
+except:
+    print('Failed to import Quang_module.examples')
