@@ -51,4 +51,4 @@ try:
         plot_convergence,
         plot_general)
 except:
-    print('Failed to import Quang_module.examples')
+    print('Failed to import Quang_module.plot')
