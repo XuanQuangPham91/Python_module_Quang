@@ -3,7 +3,7 @@
 # ------------------------------------------------------------------------------
 
 try:
-    from .FEniCS_module.FEniCS_plot import FEniCS_plot_mode
+    from .FEniCS_module.FEniCS_plot import (FEniCS_plot_mode)
 except:
     print('Failed to import FEniCS_plot')
 
@@ -26,7 +26,7 @@ except:
 #     print('Failed to import FEniCS_lagrange_interpolator')
 
 try:
-    from .FEniCS_module.FEniCS_read_XDMFFile import read_RB_XDMFFile
+    from .FEniCS_module.FEniCS_read_XDMFFile import (read_RB_XDMFFile)
 except:
     print('Failed to import FEniCS_read_XDMFFile')
 
@@ -52,3 +52,11 @@ try:
         plot_general)
 except:
     print('Failed to import Quang_module.plot')
+
+try:
+    from .Quang_module.comparison import (
+        # plotting
+        comparison_various_mesh,
+        comparison_various_80)
+except:
+    print('Failed to import Quang_module.comparison')
