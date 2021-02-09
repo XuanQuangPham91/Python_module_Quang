@@ -45,7 +45,7 @@ except:
 """ Quang auxiliary funcions """
 # ------------------------------------------------------------------------------
 try:
-    from .Quang_module.examples import (
+    from .Quang_module.plot import (
         # plotting
         # Plot_rel_error_norm,
         plot_convergence,
