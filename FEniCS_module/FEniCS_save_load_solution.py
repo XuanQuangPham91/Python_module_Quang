@@ -4,20 +4,20 @@ import matplotlib.pyplot as plt
 
 
 def save_XDMF(V, title):
-    U = Function(V)
+    u = Function(V)
     # input_file = XDMFFile(mesh.mpi_comm(), "solution/RB/%s.xdmf" % title)
     input_file = XDMFFile("solution/%s.xdmf" % title)
-    input_file.write(U, "solution")
+    input_file.write(u, "solution")
     input_file.close()
 
 
 def load_XDMF(V, title):
-    U = Function(V)
+    u = Function(V)
     # input_file = XDMFFile(mesh.mpi_comm(), "solution/RB/%s.xdmf" % title)
     input_file = XDMFFile("solution/%s.xdmf" % title)
-    input_file.read(U, "solution")
+    input_file.read(u, "solution")
     input_file.close()
-    return U
+    return u
 
 
 def save_HDF5(u, mesh, title=None):
@@ -36,7 +36,9 @@ def load_HDF5(V, mesh, title=None):
     return U
 
 
-""" saving files """
+def save_vtk(title, u):
+    # Save solution to file in VTK format
+    File('solution/title.pvd') << u
 
 
 def save_txt(u, title):
