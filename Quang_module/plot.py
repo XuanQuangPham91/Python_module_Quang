@@ -118,4 +118,4 @@ def plot_general(X, Y, xlabel, ylabel, title, format='png'):
     plt.title(title, fontsize=13)
     plt.savefig('solution/%s.%s' % (title, format), format='%s' % format)
     # fig.savefig(fig_path, bbox_inches='tight', dpi=400)
-    # plt.close()
+    plt.close()

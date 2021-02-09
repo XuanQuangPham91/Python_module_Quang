@@ -80,6 +80,7 @@ def FEniCS_plot_mode(
         save_txt(u, title=title)
     else:
         pass
+    plt.close()
 
 
 # def my_FEniCS_plot(number_of_figure, u, title):

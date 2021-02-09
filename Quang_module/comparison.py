@@ -194,6 +194,8 @@ def plot_comparison(title,
         ax1.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
         # ax1.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
     # scale_pow = 0
+
+    ### Data label ###
     # for x, y in zip(X, Y):
     #     label = "{:.2f}".format(y * 10**scale_pow)
     #     plt.annotate(
@@ -202,7 +204,8 @@ def plot_comparison(title,
     #         textcoords="offset points",  # how to position the text
     #         xytext=(0, 5),  # distance from text to points (x,y)
     #         ha='center')  # horizontal alignment can be left, right or center
-    # plt.title(title, fontsize=13)
+
+    ### save figure ###
     plt.savefig('solution/%s.%s' % (title, format), format=format)
     # fig.savefig(fig_path, bbox_inches='tight', dpi=400)
     # plt.close()
@@ -241,7 +244,9 @@ def plot_XY(title,
     if style == 'sci':
         ax1.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
         # ax1.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
-    scale_pow = 0
+
+    ### Data label ###
+    # scale_pow = 0
     # for x, y in zip(X, Y):
     #     label = "{:.2f}".format(y * 10**scale_pow)
     #     plt.annotate(
@@ -250,14 +255,15 @@ def plot_XY(title,
     #         textcoords="offset points",  # how to position the text
     #         xytext=(0, 5),  # distance from text to points (x,y)
     #         ha='center')  # horizontal alignment can be left, right or center
-    # plt.title(title, fontsize=13)
+
+    ### save figure ###
     plt.savefig('solution/%s.%s' % (title, format), format=format)
     # fig.savefig(fig_path, bbox_inches='tight', dpi=400)
     # plt.close()
 
 
-if __name__ == "__main__":
-    # comparison_various_mesh()
-    comparison_various_80()
+# if __name__ == "__main__":
+#     comparison_various_mesh()
+#     comparison_various_80()
 
-    plt.show(block=False)
+#     plt.show(block=False)
