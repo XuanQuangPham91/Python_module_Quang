@@ -56,7 +56,7 @@ except:
 try:
     from .Quang_module.comparison import (
         # plotting
-        comparison_various_mesh,
-        comparison_various_80)
+        plot_XY,
+        plot_comparison)
 except:
     print('Failed to import Quang_module.comparison')

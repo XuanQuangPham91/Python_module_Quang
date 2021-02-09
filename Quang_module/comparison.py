@@ -15,16 +15,13 @@ format = 'png'
 N = 96
 
 
-def comparison_various_mesh():
-    Y32 = loadtxt("solution/comparison_32/Relative_errornorm_32.txt",
-                  delimiter=',')
-    Y80 = loadtxt("solution/comparison_80/Relative_errornorm_80_0.txt",
-                  delimiter=',')
-    Y96 = loadtxt("solution/comparison_96/Relative_errornorm_96.txt",
-                  delimiter=',')
-
-    print(Y32)
-    # exit()
+def comparison_various_mesh(X=None, Y=None):
+    path32 = "solution/comparison_80/Relative_errornorm_32.txt"
+    path80 = "solution/comparison_80/Relative_errornorm_80.txt"
+    path96 = "solution/comparison_80/Relative_errornorm_96.txt"
+    Y = loadtxt(path32, delimiter=',')
+    Y2 = loadtxt(path80, delimiter=',')
+    Y96 = loadtxt(path96, delimiter=',')
 
     X = [
         '$\mu_0$ \n (0.5, 0.5)', '$\mu_1$ \n (0.75, 0.75)',
@@ -32,17 +29,14 @@ def comparison_various_mesh():
         '$\mu_4$\n (1.5, 1.5)'
     ]
 
+    fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(6, 6))
+    format = 'png'
+    title = ("Relative errornorm")
+    ax1.plot(X, Y, '-ks', linewidth=0.8, markersize=4.5, label=title + " 32")
+    ax1.plot(X, Y2, '-bs', linewidth=0.8, markersize=4.5, label=title + " 80")
+    ax1.plot(X, Y96, '-gs', linewidth=0.8, markersize=4.5, label=title + " 96")
     xlabel = "$\mu$"
     ylabel = "Relative errornorm ($\%$)"
-    title = ("Relative errornorm")
-    format = 'png'
-    # plt.figure()
-
-    fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(6, 6))
-    # plt.jet()
-    ax1.plot(X, Y32, '-ks', linewidth=0.8, markersize=4.5, label=title + " 32")
-    ax1.plot(X, Y80, '-bs', linewidth=0.8, markersize=4.5, label=title + " 80")
-    ax1.plot(X, Y96, '-gs', linewidth=0.8, markersize=4.5, label=title + " 96")
     ax1.set_xlabel(xlabel, fontsize=11)
     ax1.set_ylabel(ylabel, fontsize=11)
     # ax1.set_yscale('log')
@@ -55,7 +49,7 @@ def comparison_various_mesh():
     # ax1.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
     # ax1.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
     scale_pow = 0
-    # for x, y in zip(X, Y32):
+    # for x, y in zip(X, Y):
     #     label = "{:.2f}".format(y * 10**scale_pow)
     #     plt.annotate(
     #         label,  # this is the text
@@ -79,15 +73,14 @@ def comparison_various_80():
     #                 delimiter=',')
     #     exec(f'Y80_{index} = Y')
     # title = 'Y80_%s' % index
-
-    Y80_0 = loadtxt("solution/comparison_80/Relative_errornorm_80_0.txt",
-                    delimiter=',')
-    Y80_1 = loadtxt("solution/comparison_80/Relative_errornorm_80_1.txt",
-                    delimiter=',')
-    Y80_2 = loadtxt("solution/comparison_80/Relative_errornorm_80_2.txt",
-                    delimiter=',')
-    Y80_3 = loadtxt("solution/comparison_80/Relative_errornorm_80_3.txt",
-                    delimiter=',')
+    path0 = "solution/comparison_80/Relative_errornorm_80_0.txt"
+    path1 = "solution/comparison_80/Relative_errornorm_80_0.txt"
+    path2 = "solution/comparison_80/Relative_errornorm_80_0.txt"
+    path3 = "solution/comparison_80/Relative_errornorm_80_0.txt"
+    Y80_0 = loadtxt(path0, delimiter=',')
+    Y80_1 = loadtxt(path1, delimiter=',')
+    Y80_2 = loadtxt(path2, delimiter=',')
+    Y80_3 = loadtxt(path3, delimiter=',')
 
     X = [
         '$\mu_0$ \n (0.5, 0.5)', '$\mu_1$ \n (0.75, 0.75)',
@@ -95,14 +88,9 @@ def comparison_various_80():
         '$\mu_4$\n (1.5, 1.5)'
     ]
 
-    xlabel = "$\mu$"
-    ylabel = "Relative errornorm ($\%$)"
-    title = ("Relative errornorm")
-    format = 'png'
-    # plt.figure()
-
     fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(6, 6))
-    # plt.jet()
+    format = 'png'
+    title = ("Relative errornorm")
     ax1.set_title(
         ("Re-calculate relative errornorm various times \n with same number of nodes"
          ).format(sty),
@@ -133,6 +121,8 @@ def comparison_various_80():
              linewidth=0.8,
              markersize=4.5,
              label=title + " 3")
+    xlabel = "$\mu$"
+    ylabel = "Relative errornorm ($\%$)"
     ax1.set_xlabel(xlabel, fontsize=11)
     ax1.set_ylabel(ylabel, fontsize=11)
     # ax1.set_yscale('log')
@@ -145,7 +135,7 @@ def comparison_various_80():
     # ax1.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
     # ax1.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
     # scale_pow = 0
-    # for x, y in zip(X, Y32):
+    # for x, y in zip(X, Y):
     #     label = "{:.2f}".format(y * 10**scale_pow)
     #     plt.annotate(
     #         label,  # this is the text
@@ -156,6 +146,112 @@ def comparison_various_80():
     # plt.title(title, fontsize=13)
     plt.savefig('solution/%s.%s' % ((title + " various times"), format),
                 format='%s' % format)
+    # fig.savefig(fig_path, bbox_inches='tight', dpi=400)
+    # plt.close()
+
+
+def plot_comparison(title,
+                    titleY1,
+                    titleY2,
+                    format='png',
+                    xlabel="x",
+                    ylabel="y",
+                    X=None,
+                    Y1=None,
+                    Y2=None,
+                    pathX=None,
+                    pathY1=None,
+                    pathY2=None,
+                    style=None):
+    # path1 = "solution/comparison_80/Relative_errornorm_32.txt"
+    # path2 = "solution/comparison_80/Relative_errornorm_80.txt"
+
+    if pathX != None:
+        X = loadtxt(pathX, delimiter=',')
+    if pathY1 != None:
+        Y1 = loadtxt(pathY1, delimiter=',')
+    if pathY1 != None:
+        Y2 = loadtxt(pathY2, delimiter=',')
+    fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(6, 6))
+    title = ("Relative errornorm")
+    ax1.set_title(
+        title.format(sty),
+        fontsize=13,
+        # color='C0'
+    )
+    ax1.plot(X, Y1, '-ks', linewidth=0.8, markersize=4.5, label=titleY1)
+    ax1.plot(X, Y2, '-bs', linewidth=0.8, markersize=4.5, label=titleY2)
+    ax1.set_xlabel(xlabel, fontsize=11)
+    ax1.set_ylabel(ylabel, fontsize=11)
+    # ax1.set_yscale('log')
+    # ax1.set_yticks([1e-3, 1e-2, 1e-1, 1e0, 5e0])
+    # ax1.set_xticks(X)
+    ax1.grid(color='black', linestyle='--', linewidth=0.5)
+    # ax1.set_xticks(Y)
+    ax1.tick_params(labelsize=11)
+    ax1.legend(fontsize=11)
+    if style == 'sci':
+        ax1.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+        # ax1.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
+    # scale_pow = 0
+    # for x, y in zip(X, Y):
+    #     label = "{:.2f}".format(y * 10**scale_pow)
+    #     plt.annotate(
+    #         label,  # this is the text
+    #         (x, y),  # this is the point to label
+    #         textcoords="offset points",  # how to position the text
+    #         xytext=(0, 5),  # distance from text to points (x,y)
+    #         ha='center')  # horizontal alignment can be left, right or center
+    # plt.title(title, fontsize=13)
+    plt.savefig('solution/%s.%s' % (title, format), format=format)
+    # fig.savefig(fig_path, bbox_inches='tight', dpi=400)
+    # plt.close()
+
+
+def plot_XY(title,
+            format='png',
+            xlabel="x",
+            ylabel="y",
+            X=None,
+            Y=None,
+            pathX=None,
+            pathY=None,
+            style=None):
+    # path1 = "solution/comparison_80/Relative_errornorm_32.txt"  # or csv
+    if pathX != None:
+        X = loadtxt(pathX, delimiter=',')
+    if pathY != None:
+        Y = loadtxt(pathY, delimiter=',')
+    fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(6, 6))
+    ax1.set_title(
+        title.format(sty),
+        fontsize=13,
+        # color='C0'
+    )
+    ax1.plot(X, Y, '-ks', linewidth=0.8, markersize=4.5, label=title)
+    ax1.set_xlabel(xlabel, fontsize=11)
+    ax1.set_ylabel(ylabel, fontsize=11)
+    # ax1.set_yscale('log')
+    # ax1.set_yticks([1e-3, 1e-2, 1e-1, 1e0, 5e0])
+    # ax1.set_xticks(X)
+    ax1.grid(color='black', linestyle='--', linewidth=0.5)
+    # ax1.set_xticks(Y)
+    ax1.tick_params(labelsize=11)
+    # ax1.legend(fontsize=12)
+    if style == 'sci':
+        ax1.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
+        # ax1.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
+    scale_pow = 0
+    # for x, y in zip(X, Y):
+    #     label = "{:.2f}".format(y * 10**scale_pow)
+    #     plt.annotate(
+    #         label,  # this is the text
+    #         (x, y),  # this is the point to label
+    #         textcoords="offset points",  # how to position the text
+    #         xytext=(0, 5),  # distance from text to points (x,y)
+    #         ha='center')  # horizontal alignment can be left, right or center
+    # plt.title(title, fontsize=13)
+    plt.savefig('solution/%s.%s' % (title, format), format=format)
     # fig.savefig(fig_path, bbox_inches='tight', dpi=400)
     # plt.close()
 
