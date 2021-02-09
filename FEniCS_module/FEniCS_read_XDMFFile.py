@@ -1,6 +1,4 @@
 from dolfin import *
-# from Python_module_Quang import FEniCS_plot
-# import matplotlib.pyplot as plt
 # import numpy
 
 # plt.jet()
@@ -107,6 +105,8 @@ def read_RB_XDMFFile(V,
     # exec(f'u_{index} = k')
     u = Function(V)
     with XDMFFile(MPI.comm_world, filename_RB_checkpoint) as infile_checpoint:
+        # name = "function" have to define directly from the XDMFFile
+        # can be different due to each XDMFFile
         infile_checpoint.read_checkpoint(u, "function")
         infile_checpoint.close()
     # print(u.vector().get_local())
@@ -115,8 +115,11 @@ def read_RB_XDMFFile(V,
     return u
 
 
-'''
+"""
 if __name__ == "__main__":
+    from Python_module_Quang import FEniCS_plot
+    import matplotlib.pyplot as plt
+
     # test_02()
     # U_0 = Load_HDF5(V=V, mesh=mesh, title='20210122_2D_elasticity_index_0')
     for index in range(5):
@@ -139,4 +142,4 @@ if __name__ == "__main__":
             #  number_of_figure=index + 1,
             savefig=True)
     # plt.show(block=False)
-'''
+"""
