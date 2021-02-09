@@ -9,12 +9,12 @@ except:
 
 try:
     from .FEniCS_module.FEniCS_save_load_solution import (
-        # save file
+        ### save file ##
         save_XDMF,
         save_HDF5,
         save_vtk,
         save_u_txt,
-        # load file
+        ### load file ###
         load_HDF5,
         load_XDMF)
 except:
@@ -33,7 +33,7 @@ except:
 
 try:
     from .FEniCS_module.FEniCS_post_processing import (
-        # post-processing
+        ### post-processing ###
         normalize_solution,
         absolute_error,
         relative_error,
@@ -47,18 +47,12 @@ except:
 # ------------------------------------------------------------------------------
 try:
     from .Quang_module.plot import (
-        # plotting
+        ### plotting ###
         # Plot_rel_error_norm,
         plot_convergence,
+        plot_XY,
+        plot_comparison,
         # plot_general  # has been replace by plot_XY
     )
 except:
     print('Failed to import Quang_module.plot')
-
-try:
-    from .Quang_module.comparison import (
-        # plotting
-        plot_XY,
-        plot_comparison)
-except:
-    print('Failed to import Quang_module.comparison')
