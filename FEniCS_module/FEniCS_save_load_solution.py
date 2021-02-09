@@ -1,6 +1,9 @@
 from dolfin import *
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
+
+#------------------------------------------------------------------------------
+''' XDMF '''
 
 
 def save_XDMF(V, title):
@@ -20,6 +23,10 @@ def load_XDMF(V, title):
     return u
 
 
+#------------------------------------------------------------------------------
+''' HDF5 '''
+
+
 def save_HDF5(u, mesh, title=None):
     output_file = HDF5File(mesh.mpi_comm(), "solution/%s.h5" % title, "w")
     # input_file = HDF5File("solution/%s.h5" % title, "r")
@@ -28,34 +35,39 @@ def save_HDF5(u, mesh, title=None):
 
 
 def load_HDF5(V, mesh, title=None):
-    U = Function(V)
+    u = Function(V)
     input_file = HDF5File(mesh.mpi_comm(), "solution/%s.h5" % title, "r")
     # input_file = HDF5File("solution/%s.h5" % title, "r")
-    input_file.read(U, "solution")
+    input_file.read(u, "solution")
     input_file.close()
-    return U
+    return u
 
 
-def save_vtk(title, u):
+#------------------------------------------------------------------------------
+''' vtk '''
+
+
+def save_vtk(u, title):
     # Save solution to file in VTK format
-    File('solution/title.pvd') << u
+    File('solution/%s.pvd' % title) << u
 
 
-def save_txt(u, title):
-    """ saving files """
-    coor = mesh.coordinates()
-    u_text = []
+#------------------------------------------------------------------------------
+''' txt '''
+
+
+def save_u_txt(u, title):
     u_array = u.vector().get_local()
-    print("len %s:%d" % (title, len(u_array)))
+    print("len of %s: %d" % (title, len(u_array)))
+    np.savetxt(
+        "solution/%s.txt" % title,
+        np.array(u_array),
+        #    fmt="%s",
+    )
 
+    # u_text = []
+    # coor = mesh.coordinates()
     # for i in range(len(u_array)):
     #     u_temp = (coor[i][0], coor[i][1], u_array[i])
     #     print("u(%8g,%8g) = %g" % (coor[i][0], coor[i][1], u_array[i]))
     #     u_text.append(coor[i][0])
-
-    np.savetxt(
-        "solution/%s.txt" % title,
-        np.array(u11.vector().get_local()),
-        #    fmt="%s",
-    )
-    # np.savetxt("results/periodic_u11_coordinate.txt", np.array(coor))

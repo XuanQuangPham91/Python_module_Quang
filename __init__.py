@@ -12,7 +12,8 @@ try:
         # save file
         save_XDMF,
         save_HDF5,
-        save_txt,
+        save_vtk,
+        save_u_txt,
         # load file
         load_HDF5,
         load_XDMF)
