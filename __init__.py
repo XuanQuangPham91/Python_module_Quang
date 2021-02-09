@@ -49,7 +49,8 @@ try:
         # plotting
         # Plot_rel_error_norm,
         plot_convergence,
-        plot_general)
+        # plot_general  # has been replace by plot_XY
+    )
 except:
     print('Failed to import Quang_module.plot')
 

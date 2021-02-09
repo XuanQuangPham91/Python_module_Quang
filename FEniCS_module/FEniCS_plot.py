@@ -44,7 +44,7 @@ def FEniCS_plot_mode(
     xlabel='$x$',
     ylabel='$y$',
     mode=None,
-    number_of_figure=None,
+    number_of_figure=True,
     savefig=None,
     savefiletxt=None,
     grid=None,
@@ -52,6 +52,7 @@ def FEniCS_plot_mode(
     """
     mode=None, "glyphs", "displacement",
     """
+    plt.jet()
     if number_of_figure == None:
         pass
     elif number_of_figure == True:

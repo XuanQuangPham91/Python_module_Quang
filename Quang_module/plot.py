@@ -94,6 +94,7 @@ def plot_convergence(X, Y, fig_path=None):
 
 def plot_general(X, Y, xlabel, ylabel, title, format='png'):
     fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(6, 6))
+    plt.jet()
     ax1.plot(X, Y, '-ks', linewidth=0.8, markersize=4.5, label=title)
     ax1.set_xlabel(xlabel, fontsize=11)
     ax1.set_ylabel(ylabel, fontsize=11)
