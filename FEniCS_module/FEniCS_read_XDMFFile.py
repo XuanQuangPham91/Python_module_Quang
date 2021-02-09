@@ -95,10 +95,11 @@ from dolfin import *
 #     f_in.close()
 
 
-def Read_RB_XDMFFile(V,
+def read_RB_XDMFFile(V,
                      filename_RB_checkpoint=None,
-                     filename_mesh=None,
-                     index=None):
+                     filename_mesh=None
+                     #  index=None
+                     ):
     # mesh = Mesh("20210118_data_elastic/elastic_block.xml")
     mesh = Mesh(filename_mesh)
     # V = VectorFunctionSpace(mesh, 'P', 1)

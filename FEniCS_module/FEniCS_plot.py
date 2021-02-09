@@ -41,6 +41,8 @@ def FEniCS_plot_mode(
     u,
     title,
     format="png",
+    xlabel='$x$',
+    ylabel='$y$',
     mode=None,
     number_of_figure=None,
     savefig=None,
@@ -67,8 +69,8 @@ def FEniCS_plot_mode(
     else:
         pass
     plt.title(title)
-    plt.xlabel('$x$')
-    plt.ylabel('$y$')
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
     plt.colorbar(p)
     if savefig == True:
         plt.savefig('solution/%s.%s' % (title, format), format='%s' % format)

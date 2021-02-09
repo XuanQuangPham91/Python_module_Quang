@@ -26,7 +26,7 @@ except:
 #     print('Failed to import FEniCS_lagrange_interpolator')
 
 try:
-    from .FEniCS_module.FEniCS_read_XDMFFile import Read_RB_XDMFFile
+    from .FEniCS_module.FEniCS_read_XDMFFile import read_RB_XDMFFile
 except:
     print('Failed to import FEniCS_read_XDMFFile')
 
@@ -47,7 +47,8 @@ except:
 try:
     from .Quang_module.examples import (
         # plotting
-        Plot_rel_error_norm,
-        plot_convergence)
+        # Plot_rel_error_norm,
+        plot_convergence,
+        plot_general)
 except:
     print('Failed to import Quang_module.examples')
