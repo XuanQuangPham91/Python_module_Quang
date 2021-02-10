@@ -372,16 +372,16 @@ def plot_XY(title,
         ax1.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
         # ax1.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 
-    ### Data label ###
-    # scale_pow = 0
-    # for x, y in zip(X, Y):
-    #     label = "{:.2f}".format(y * 10**scale_pow)
-    #     plt.annotate(
-    #         label,  # this is the text
-    #         (x, y),  # this is the point to label
-    #         textcoords="offset points",  # how to position the text
-    #         xytext=(0, 5),  # distance from text to points (x,y)
-    #         ha='center')  # horizontal alignment can be left, right or center
+    ## Data label ###
+    scale_pow = 0
+    for x, y in zip(X, Y):
+        label = "{:.2f}".format(y * 10**scale_pow)
+        plt.annotate(
+            label,  # this is the text
+            (x, y),  # this is the point to label
+            textcoords="offset points",  # how to position the text
+            xytext=(0, 5),  # distance from text to points (x,y)
+            ha='center')  # horizontal alignment can be left, right or center
 
     ### save figure ###
     plt.savefig('solution/%s.%s' % (title, format), format=format)
