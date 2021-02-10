@@ -9,3 +9,6 @@
 
 * python3 -m nbconvert --to html 20210126_2D_RB_elastic.ipynb 
 
+<!--stackedit_data:
+eyJoaXN0b3J5IjpbNDI4NDk3Nzk5XX0=
+-->
