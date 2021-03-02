@@ -6,11 +6,12 @@ import numpy as np
 ''' XDMF '''
 
 
-def save_XDMF(V, title):
-    u = Function(V)
+def save_XDMF(u, mesh, title):
+    # u = Function(V)
     # input_file = XDMFFile(mesh.mpi_comm(), "solution/RB/%s.xdmf" % title)
-    input_file = XDMFFile("solution/%s.xdmf" % title)
-    input_file.write(u, "solution")
+    input_file = XDMFFile(mesh.mpi_comm(), "solution/%s.xdmf" % title)
+    # input_file = XDMFFile("solution/%s.xdmf" % title)
+    input_file.write_checkpoint(u, "solution")
     input_file.close()
 
 

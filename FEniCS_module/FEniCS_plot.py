@@ -36,9 +36,9 @@ def FEniCS_plot_mode(
     else:
         plt.figure(number_of_figure)
     if mode == None:
-        p = plot(u, title='%s' % title)
+        p = plot(u, title=title)
     else:
-        p = plot(u, title='%s' % title, mode=mode)
+        p = plot(u, title=title, mode=mode)
     # plt.axis('tight')
     # plt.legend()
     if grid == True:
@@ -50,7 +50,8 @@ def FEniCS_plot_mode(
     plt.ylabel(ylabel)
     plt.colorbar(p)
     if savefig == True:
-        plt.savefig('solution/%s.%s' % (title, format), format='%s' % format)
+        # plt.savefig('solution/%s.%s' % (title, format), format='%s' % format)
+        plt.savefig(f'solution/{title}.{format}', format=format)
     else:
         pass
     if savefiletxt == True:
