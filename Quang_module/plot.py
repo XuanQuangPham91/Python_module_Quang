@@ -47,7 +47,7 @@ def Plot_rel_error_norm(non_affine_rel_errornorm_list,
     plt.close()
 
 
-def plot_convergence(X, Y, format='png', fig_path=None):
+def plot_convergence(X, Y, format='png', fig_path=None, scale_pow=4):
     fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(6, 5))
     ax1.plot(X, Y, '-ks', linewidth=0.8, markersize=4.5, label='convergence')
     ax1.set_xlabel('Number of nodes', fontsize=11)
@@ -61,7 +61,7 @@ def plot_convergence(X, Y, format='png', fig_path=None):
     ax1.legend(fontsize=12)
     ax1.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
     ax1.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
-    scale_pow = 2
+    # scale_pow = 4
     for x, y in zip(X, Y):
         label = "{:.2f}".format(y * 10**scale_pow)
         plt.annotate(

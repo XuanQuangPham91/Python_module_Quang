@@ -1,5 +1,7 @@
 from dolfin import *
 import numpy as np
+import meshio
+
 # import matplotlib.pyplot as plt
 
 #------------------------------------------------------------------------------
@@ -22,6 +24,30 @@ def load_XDMF(V, title):
     input_file.read(u, "solution")
     input_file.close()
     return u
+
+
+def load_mesh_RBniCS(filename):
+    """ 
+    # Load mesh from xdmf example. 
+    * Notice that filename don't have the extension xdmf 
+    * Function will create xml file to export mesh as xml
+    * Read back and return mesh
+
+    if __name__ == "__main__":
+        filename = "solution copy"
+        mesh = load_mesh_RBniCS(filename)
+
+        plot(mesh)
+        plt.show()
+    """
+    with meshio.xdmf.TimeSeriesReader(f"{filename}.xdmf") as reader:
+        points, cells = reader.read_points_cells()
+        for k in range(reader.num_steps):
+            t, point_data, cell_data = reader.read_data(k)
+
+    meshio.Mesh(points, cells).write(f"{filename}.xml")
+    mesh = Mesh(f"{filename}.xml")
+    return mesh
 
 
 #------------------------------------------------------------------------------
