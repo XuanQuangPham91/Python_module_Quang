@@ -12,11 +12,12 @@ try:
         ### save file ##
         save_XDMF,
         save_HDF5,
-        save_vtk, 
+        save_vtk,
         save_u_txt,
         ### load file ###
         load_HDF5,
-        load_XDMF)
+        load_XDMF,
+        load_mesh_RBniCS)
 except:
     print('Failed to import FEniCS_save_load_solution')
 
