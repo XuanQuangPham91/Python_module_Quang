@@ -93,22 +93,31 @@ from dolfin import *
 #     f_in.close()
 
 
-def read_RB_XDMFFile(V,
-                     filename_RB_checkpoint=None,
-                     filename_mesh=None
-                     #  index=None
-                     ):
+def read_RB_XDMFFile(
+    V,
+    checkpoint_name="function",
+    filename_RB_checkpoint=None,
+    filename_mesh=None,
+    mesh=None,
+):
     # mesh = Mesh("20210118_data_elastic/elastic_block.xml")
-    mesh = Mesh(filename_mesh)
-    # V = VectorFunctionSpace(mesh, 'P', 1)
+    if mesh == None:
+        mesh = Mesh(filename_mesh)
+    else:
+        mesh = mesh
+    # if filename_mesh == None:
+    #     mesh = mesh
+    # else:
+    #     mesh = Mesh(filename_mesh)
+    V = VectorFunctionSpace(mesh, 'P', 1)
     # filename_RB_checkpoint = "solution/online_solution_0/solution_checkpoint.xdmf"
     # exec(f'u_{index} = k')
     u = Function(V)
-    with XDMFFile(MPI.comm_world, filename_RB_checkpoint) as infile_checpoint:
+    with XDMFFile(MPI.comm_world, filename_RB_checkpoint) as infile_checkpoint:
         # name = "function" have to define directly from the XDMFFile
         # can be different due to each XDMFFile
-        infile_checpoint.read_checkpoint(u, "function")
-        infile_checpoint.close()
+        infile_checkpoint.read_checkpoint(u, checkpoint_name)
+        infile_checkpoint.close()
     # print(u.vector().get_local())
     # plot(u, mode="displacement")
     # print(mesh.num_cells(), mesh2.num_cells())
