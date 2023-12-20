@@ -60,7 +60,7 @@ def check_create_dir(data_RB_path):
         os.mkdir(data_RB_path)
 
 def delete_model(delete_state=False, modelName=""):
-    if delete_model and os.path.isdir(modelName):
+    if delete_state and os.path.isdir(modelName):
         shutil.rmtree(modelName)
         print("Removed folder")
 
