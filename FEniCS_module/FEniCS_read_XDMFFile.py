@@ -109,7 +109,7 @@ def read_RB_XDMFFile(
     #     mesh = mesh
     # else:
     #     mesh = Mesh(filename_mesh)
-    V = VectorFunctionSpace(mesh, 'P', 1)
+    # V = VectorFunctionSpace(mesh, 'P', 1)
     # filename_RB_checkpoint = "solution/online_solution_0/solution_checkpoint.xdmf"
     # exec(f'u_{index} = k')
     u = Function(V)

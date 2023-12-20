@@ -98,3 +98,25 @@ def save_u_txt(u, title):
     #     u_temp = (coor[i][0], coor[i][1], u_array[i])
     #     print("u(%8g,%8g) = %g" % (coor[i][0], coor[i][1], u_array[i]))
     #     u_text.append(coor[i][0])
+
+# ==============================================================================
+# ==============================================================================
+def RBniCS_convert_mesh(solution_path, mesh_path):
+    """
+    https://pythonlang.dev/repo/nschloe-meshio/
+    """
+    with meshio.xdmf.TimeSeriesReader(solution_path) as reader:
+        points, cells = reader.read_points_cells()
+        for k in range(reader.num_steps):
+            t, point_data, cell_data = reader.read_data(k)
+
+    mesh = meshio.Mesh(points=points,
+                       cells=cells,
+                       point_data=point_data,
+                       cell_data=cell_data)
+    mesh.write(mesh_path)
+
+    mesh = Mesh(mesh_path)
+    File(mesh_path) << mesh
+
+    return mesh

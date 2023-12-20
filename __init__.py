@@ -3,12 +3,12 @@
 # ------------------------------------------------------------------------------
 
 try:
-    from .FEniCS_module.FEniCS_plot import (FEniCS_plot_mode)
+    from Python_module_Quang.FEniCS_module.FEniCS_plot import (FEniCS_plot_mode)
 except:
     print('Failed to import FEniCS_plot')
 
 try:
-    from .FEniCS_module.FEniCS_save_load_solution import (
+    from Python_module_Quang.FEniCS_module.FEniCS_save_load_solution import (
         ### save file ##
         save_XDMF,
         save_HDF5,
@@ -17,7 +17,8 @@ try:
         ### load file ###
         load_HDF5,
         load_XDMF,
-        load_mesh_RBniCS)
+        load_mesh_RBniCS,
+        RBniCS_convert_mesh)
 except:
     print('Failed to import FEniCS_save_load_solution')
 
@@ -28,12 +29,12 @@ except:
 #     print('Failed to import FEniCS_lagrange_interpolator')
 
 try:
-    from .FEniCS_module.FEniCS_read_XDMFFile import (read_RB_XDMFFile)
+    from Python_module_Quang.FEniCS_module.FEniCS_read_XDMFFile import (read_RB_XDMFFile)
 except:
     print('Failed to import FEniCS_read_XDMFFile')
 
 try:
-    from .FEniCS_module.FEniCS_post_processing import (
+    from Python_module_Quang.FEniCS_module.FEniCS_post_processing import (
         ### post-processing ###
         normalize_solution,
         absolute_error,
@@ -47,7 +48,7 @@ except:
 """ Quang auxiliary funcions """
 # ------------------------------------------------------------------------------
 try:
-    from .Quang_module.plot import (
+    from Python_module_Quang.Quang_module.plot import (
         ### plotting ###
         # Plot_rel_error_norm,
         plot_convergence,
@@ -57,3 +58,8 @@ try:
     )
 except:
     print('Failed to import Quang_module.plot')
+
+try:
+    from Python_module_Quang.Homogenization_module import (auxiliary_codes)
+except:
+    print('Failed to import Homogenization_module')
