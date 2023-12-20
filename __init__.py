@@ -1,7 +1,6 @@
-# ------------------------------------------------------------------------------
+# ==============================================================================
 """ FEniCS auxiliary funcions """
-# ------------------------------------------------------------------------------
-
+# ==============================================================================
 try:
     from Python_module_Quang.FEniCS_module.FEniCS_plot import (FEniCS_plot_mode)
 except:
@@ -44,9 +43,9 @@ try:
 except:
     print('Failed to import FEniCS_auxiliary_code')
 
-# ------------------------------------------------------------------------------
+# ==============================================================================
 """ Quang auxiliary funcions """
-# ------------------------------------------------------------------------------
+# ==============================================================================
 try:
     from Python_module_Quang.Quang_module.plot import (
         ### plotting ###
@@ -59,7 +58,43 @@ try:
 except:
     print('Failed to import Quang_module.plot')
 
+# ==============================================================================
+""" Homogenization_module """
+# ==============================================================================
+
 try:
-    from Python_module_Quang.Homogenization_module import (auxiliary_codes)
+    from Python_module_Quang.Homogenization_module.auxiliary_codes import (
+        # Function =============================================================
+        check_create_dir,
+        delete_model,
+        check_log,
+        copy_and_overwrite,
+        RBniCS_convert_mesh,
+        my_plot,
+        plot_greedy,
+        plot_sample_with_error_in_effecitivity,
+        plot_box_whisker,
+        plot_error_analysis,
+        plot_error_analysis_manual,
+        plot_error_analysis_effectivity,
+        manual_error_analysis,
+        basis_function_grad,
+        # Class ================================================================
+        Logger,
+        PeriodicBoundary,
+        error_estimation,
+    )
 except:
-    print('Failed to import Homogenization_module')
+    print('Failed to import Homogenization_module.auxiliary_codes')
+
+
+try:
+    from Python_module_Quang.Homogenization_module.LatinHyperCube_sampling import (
+        # Function =============================================================
+        sample_set_RBniCS_formater,
+        Latin_Hypercube_sampling,
+        Latin_Hypercube_sampling_func,
+        # Class ================================================================
+    )
+except:
+    print('Failed to import Homogenization_module.LatinHyperCube_sampling')

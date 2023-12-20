@@ -2,8 +2,8 @@ from dolfin import *
 import dolfin as df
 from mshr import *
 from Python_module_Quang import *
-from matplotlib.ticker import \
-    MaxNLocator, MultipleLocator, AutoMinorLocator, plticker
+from matplotlib.ticker import MaxNLocator, MultipleLocator, AutoMinorLocator
+# plticker
 # ==============================================================================
 # ==============================================================================
 
@@ -58,6 +58,11 @@ start = time.time()
 def check_create_dir(data_RB_path):
     if os.path.exists(data_RB_path) == False:
         os.mkdir(data_RB_path)
+
+def delete_model(delete_state=False, modelName=""):
+    if delete_model and os.path.isdir(modelName):
+        shutil.rmtree(modelName)
+        print("Removed folder")
 
 def check_log(log_path, remove=False):
     """
@@ -252,6 +257,438 @@ def plot_greedy(
 
 
 # return greedy_rel_error
+
+# In[]
+def plot_sample_with_error_in_effecitivity(current_directory, RB_folder,
+                                           fig_path):
+    error_folder = os.path.join(current_directory, RB_folder,
+                                'manual_error_analysis')
+    error_data_list = os.listdir(error_folder)
+    N = len(error_data_list)
+    error_file_path = os.path.join(error_folder, '%s.csv' % N)
+    error_data = pd.read_csv(error_file_path)
+    effectivity_lower_one = error_data[error_data['effectivity'] < 1]
+    effectivity_larger_one = error_data[error_data['effectivity'] >= 1]
+
+    fig, ax = plt.subplots(1,1)
+    fig.set_figwidth(value_width)
+    ax.scatter(effectivity_larger_one['radius'],
+               effectivity_larger_one['K_fiber'],
+               marker='x',
+               c="blue",
+               s=100,
+               label='Effectivity $\geqslant 1$')
+    ax.scatter(effectivity_lower_one['radius'],
+               effectivity_lower_one['K_fiber'],
+               marker='o',
+               c="none",
+               edgecolors='red',
+               s=100,
+               linewidths=2.0,
+               label='Effectivity $< 1$')
+    font_size = 14
+    tick_size = 12
+    ax.grid(color='black', linestyle='--', linewidth=0.5)
+    ax.set_xlabel('radius $r$', fontsize=font_size)
+    ax.set_ylabel('$k_{\mathrm{f}}$', fontsize=font_size)
+    ax.legend(fontsize=12)
+    ax.tick_params(labelsize=tick_size)
+    ax.set_aspect('equal')
+    fig.savefig(fig_path, bbox_inches='tight', dpi=600)
+    plt.close()
+
+
+def plot_box_whisker(
+    current_directory,
+    RB_folder,
+    fig_path,
+    boxplot_data_path,
+    configuration=None,
+    plot_header='effectivity',
+):
+
+    def get_box_plot_data(N_list, bp):
+        rows_list = []
+        for i in range(len(N_list)):
+            dict1 = {}
+            dict1['N'] = N_list[i]
+            dict1['lower_whisker'] = bp['whiskers'][i * 2].get_ydata()[1]
+            dict1['lower_quartile'] = bp['boxes'][i].get_ydata()[1]
+            dict1['median'] = bp['medians'][i].get_ydata()[1]
+            dict1['upper_quartile'] = bp['boxes'][i].get_ydata()[2]
+            dict1['upper_whisker'] = bp['whiskers'][(i * 2) + 1].get_ydata()[1]
+            rows_list.append(dict1)
+        return pd.DataFrame(rows_list)
+
+    plt.rcParams['text.usetex'] = True
+
+    error_folder = os.path.join(current_directory, RB_folder,
+                                'manual_error_analysis')
+    error_data_list = os.listdir(error_folder)
+    N_list = [i + 1 for i in range(len(error_data_list))]
+    dict = {}
+    for N in N_list:
+        error_file_path = os.path.join(error_folder, '%s.csv' % N)
+        error_data = pd.read_csv(error_file_path)
+        eff = error_data[plot_header].values.tolist()
+        dict['%s' % N] = eff
+    fig, ax = plt.subplots(nrows=1,ncols=1)
+    fig.set_figwidth(value_width)
+    ax.set_box_aspect(1)
+    boxplot = ax.boxplot(dict.values(), showfliers=True)
+    font_size = fontsize
+    tick_size = fontsize
+    # ax.set_xticks(N)
+    # ax.set_yscale('log')
+    ax.grid(color='black', linestyle='--', linewidth=0.5)
+    ax.set_xlabel(r'Number of basis functions $\textit{N}$',
+                  fontsize=font_size)
+
+    ax.tick_params(labelsize=tick_size)
+    xleft, yright = ax.get_xlim()
+    interval = 3
+    ## =====================================================================
+    if interval == 2:
+        ## interval = 2
+        if yright % 2 == 0:
+            yright = yright + 2
+            # ax.set_xlim(0.0, yright)
+        else:
+            yright = yright + 1
+            # ax.set_xlim(0.0, yright)
+        ax.set_xticks(np.arange(0.0, yright, 2.0))
+        ax.set_xticklabels(np.arange(0.0, yright, 2.0, dtype=int))
+    ## =====================================================================
+    elif interval == 3:
+        ## interval = 3
+        if yright % 3 == 0:
+            yright = yright + 1
+            # ax.set_xlim(0.0, yright)
+        else:
+            yright = yright + 1
+            while yright % 3 == 0:
+                yright = yright + 1
+                # ax.set_xlim(0.0, yright)
+            # ax.set_xlim(0.0, yright)
+        ax.set_xticks(np.arange(0.0, yright, 3.0))
+        ax.set_xticklabels(np.arange(0.0, yright, 3.0, dtype=int))
+    ## =========================================================================
+    ## =========================================================================
+    # if yright % 2 == 0:
+    #     yright = yright + 2
+    #     # ax.set_xlim(0.0, yright)
+    # else:
+    #     yright = yright + 1
+    #     # ax.set_xlim(0.0, yright)
+    # ax.set_xticks(np.arange(0.0, yright, 2.0))
+    # ax.set_xticklabels(np.arange(0.0, yright, 2.0, dtype=int))
+    ## =========================================================================
+    ## =========================================================================
+
+    # locator = MultipleLocator(10)
+    # ax.xaxis.set_major_locator(locator)
+    # ax.xaxis.set_minor_locator(AutoMinorLocator())
+    # loc = plticker.MultipleLocator(
+    #     base=2.0)  # this locator puts ticks at regular intervals
+    # ax.xaxis.set_major_locator(loc)
+
+    if plot_header == 'effectivity':
+        ax.set_ylabel(r'Effectivity $\eta^{N}_\mathbb{V}(\mu)$', fontsize=font_size)
+        # ax.set_yticks(range(int(np.round(ymax, 0)) + 1))
+        if configuration == "Oliveira":
+            ax.set_ylim(0, 16)  # oliveira
+        if configuration == "Macedo":
+            ax.set_ylim(0, 45)  # macedo
+        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+    elif plot_header == 'residual_norm':
+        # ax.set_ylabel(r'Residual norm $\lVert \hat{r}_\delta (\mu) \rVert$',
+        ax.set_ylabel(r'Dual norm of residual $ \| \hat{r}_\delta (\mu) \|$',
+                      fontsize=font_size)
+        ax.set_yscale('log')
+    elif plot_header == 'residual_norm_squared':
+        ax.set_ylabel(
+            r'Squared of dual norm of residual $\| \hat{r}_\delta (\mu) \| ^2$',
+            fontsize=font_size)
+        ax.set_yscale('log')
+    # elif plot_header == 'SCM_alpha_LB':
+    #     ax.set_ylabel(r'Truth error $ \| e (\mu) \|_{\mathbb{V}} $',
+    #                   fontsize=font_size)
+    elif plot_header == 'error':  #\mathrm{\mathbb{}} ## error exact
+        ax.set_ylabel(r'Truth error $ \| e (\mu) \|_{\mathbb{V}} $',
+                      fontsize=font_size)
+        ax.set_yscale('log')
+        # ax.set_yticklabels([])
+    elif plot_header == 'error_estimator':
+        ax.set_ylabel(r'Error estimator $\Delta_{N} (\mu)$',
+                      fontsize=font_size)
+        ax.set_yscale('log')
+        # ax.set_yticklabels([])
+
+    # ax.set_ylim((0,12))
+    # ax.set_yticks([0, 1, 2, 3, 4, 5])
+    # ax.set_yticks(range(int(np.round(ymax, 0)) + 1))
+    # ax.yaxis.set_minor_locator(AutoMinorLocator())
+    # ax.set_yticks([0,5,10,15,20])
+    # ax.legend(fontsize=font_size)
+    fig.savefig(fig_path, bbox_inches='tight', dpi=600)
+    boxplot_data = get_box_plot_data(N_list, boxplot)
+    boxplot_data.to_csv(boxplot_data_path, index=False)
+    plt.close()
+
+
+# In[]
+
+
+def plot_error_analysis(current_directory, RB_folder, fig_path):
+    error_file_path = os.path.join(current_directory, RB_folder,
+                                   'error_analysis', 'error_analysis',
+                                   'solution_u_error.csv')
+    error_data = pd.read_csv(error_file_path, delimiter=';')
+    N = error_data['N'].values.tolist()
+    # print(f"N: {N}")
+    max_error = error_data['max(error_u)'].values.tolist()
+    # print(f"max_error: {max_error}")
+    max_bound = error_data['max(error_estimator_u)'].values.tolist()
+    # print(f"max_bound: {max_bound}")
+    mean_error = error_data['gmean(error_u)'].values.tolist()
+    # print(f"mean_error: {mean_error}")
+    mean_bound = error_data['gmean(error_estimator_u)'].values.tolist()
+    fig, ax = plt.subplots(nrows=1,ncols=1)
+    fig.set_figwidth(value_width)
+    ax.plot(N,
+            max_bound,
+            ':bo',
+            linewidth=3.0,
+            markersize=6.5,
+            label=r'Max $\Delta^{N}$')
+    ax.plot(N,
+            max_error,
+            '-bo',
+            linewidth=1.0,
+            markersize=8.5,
+            label=r'Max $||e||_X$',
+            mfc='none')
+    ax.plot(N,
+            mean_bound,
+            ':r^',
+            linewidth=3.0,
+            markersize=6.5,
+            label=r'Average $\Delta^{N}$')
+    ax.plot(N,
+            mean_error,
+            '-r^',
+            linewidth=1.0,
+            markersize=8.5,
+            label=r'Average $||e||_X$',
+            mfc='none')
+
+    font_size = fontsize
+    tick_size = fontsize
+    # ax.set_xticks(N)
+    xleft, yright = ax.get_xlim()
+    interval = 3
+    ## =====================================================================
+    if interval == 2:
+        ## interval = 2
+        if yright % 2 == 0:
+            yright = yright + 2
+            # ax.set_xlim(0.0, yright)
+        else:
+            yright = yright + 1
+            # ax.set_xlim(0.0, yright)
+        ax.set_xticks(np.arange(0.0, yright, 2.0))
+        ax.set_xticklabels(np.arange(0.0, yright, 2.0, dtype=int))
+    ## =====================================================================
+    elif interval == 3:
+        ## interval = 3
+        if yright % 3 == 0:
+            yright = yright + 1
+            # ax.set_xlim(0.0, yright)
+        else:
+            yright = yright + 1
+            while yright % 3 == 0:
+                yright = yright + 1
+                # ax.set_xlim(0.0, yright)
+            # ax.set_xlim(0.0, yright)
+        ax.set_xticks(np.arange(0.0, yright, 3.0))
+        ax.set_xticklabels(np.arange(0.0, yright, 3.0, dtype=int))
+    ## =========================================================================
+
+    ax.set_xticks(np.arange(0.0, yright, 2.0))
+    ax.set_xticklabels(np.arange(0.0, yright, 2.0, dtype=int))
+
+    # loc = plticker.MultipleLocator(
+    #     base=2.0)  # this locator puts ticks at regular intervals
+    # ax.xaxis.set_major_locator(loc)
+
+    ax.set_yscale('log')
+    ax.grid(color='black', linestyle='--', linewidth=0.5)
+    # ax.set_yticks([1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 1e1])
+    ax.set_xlabel(r'Number of basis functions $\textit{N}$',
+                  fontsize=font_size)
+    ax.set_ylabel(r'Absolute error', fontsize=font_size)
+    ax.tick_params(labelsize=tick_size)
+    ax.legend(fontsize=font_size)
+    # plt.show()
+    ax.set_box_aspect(1)
+    fig.savefig(fig_path, bbox_inches='tight', dpi=600)
+    plt.close()
+
+
+def plot_error_analysis_manual(
+    current_directory,
+    RB_folder,
+    fig_path,
+):
+    plt.rcParams['text.usetex'] = True
+
+    error_folder = os.path.join(current_directory, RB_folder,
+                                'manual_error_analysis')
+    error_data_list = os.listdir(error_folder)
+    N_list = [i + 1 for i in range(len(error_data_list))]
+    max_error_u_list, max_error_estimator_u_list = [], []
+    gmean_error_u_list, gmean_error_estimator_u_list = [], []
+
+    for plot_header in ["error", "error_estimator"]:
+        for N in N_list:
+            error_file_path = os.path.join(error_folder, '%s.csv' % N)
+            error_data = pd.read_csv(error_file_path)
+            mean_error = np.average(error_data[plot_header].values.tolist())
+            max_error = np.amax(error_data[plot_header].values.tolist())
+            if plot_header == "error":
+                max_error_u_list.append(max_error)
+                gmean_error_u_list.append(mean_error)
+            elif plot_header == "error_estimator":
+                max_error_estimator_u_list.append(max_error)
+                gmean_error_estimator_u_list.append(mean_error)
+
+    # original from here
+    N = N_list
+
+    fig, ax = plt.subplots(nrows=1,ncols=1)
+    fig.set_figwidth(value_width)
+    # 'max(error_estimator_u)' : max error bound
+    ax.plot(N,
+            max_error_estimator_u_list,
+            ':bo',
+            linewidth=3.0,
+            markersize=6.5,
+            label=r'Max $\Delta^{N}$')
+    # 'max(error_u)' : max truth error
+    ax.plot(N,
+            max_error_u_list,
+            '-bo',
+            linewidth=1.0,
+            markersize=8.5,
+            label=r'Max $||e||_X$',
+            mfc='none')
+    # 'gmean(error_estimator_u)' : mean error bound
+    ax.plot(N,
+            gmean_error_estimator_u_list,
+            ':r^',
+            linewidth=3.0,
+            markersize=6.5,
+            label=r'Average $\Delta^{N}$')
+    # 'gmean(error_u)' : mean truth error
+    ax.plot(N,
+            gmean_error_u_list,
+            '-r^',
+            linewidth=1.0,
+            markersize=8.5,
+            label=r'Average $||e||_X$',
+            mfc='none')
+
+    font_size = fontsize
+    tick_size = fontsize
+    ax.set_xticks(N)
+    ax.set_yscale('log')
+    ax.grid(color='black', linestyle='--', linewidth=0.5)
+    # ax.set_yticks([1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 1e1])
+    ax.set_xlabel(r'Number of basis functions $\textit{N}$',
+                  fontsize=font_size)
+    ax.set_ylabel(r'Absolute error', fontsize=font_size)
+    ax.tick_params(labelsize=tick_size)
+    xleft, yright = ax.get_xlim()
+    interval = 3
+    ## =====================================================================
+    if interval == 2:
+        ## interval = 2
+        if yright % 2 == 0:
+            yright = yright + 2
+            # ax.set_xlim(0.0, yright)
+        else:
+            yright = yright + 1
+            # ax.set_xlim(0.0, yright)
+        ax.set_xticks(np.arange(0.0, yright, 2.0))
+        ax.set_xticklabels(np.arange(0.0, yright, 2.0, dtype=int))
+    ## =====================================================================
+    elif interval == 3:
+        ## interval = 3
+        if yright % 3 == 0:
+            yright = yright + 1
+            # ax.set_xlim(0.0, yright)
+        else:
+            yright = yright + 1
+            while yright % 3 == 0:
+                yright = yright + 1
+                # ax.set_xlim(0.0, yright)
+            # ax.set_xlim(0.0, yright)
+        ax.set_xticks(np.arange(0.0, yright, 3.0))
+        ax.set_xticklabels(np.arange(0.0, yright, 3.0, dtype=int))
+    ## =========================================================================
+
+
+    ax.tick_params(labelsize=tick_size)
+    # ax.legend(fontsize=16, framealpha=0.4, loc='upper right')
+    ax.legend(ncol=2, bbox_to_anchor=(0.05, 1.2, 1., .102), fontsize=fontsize-3,
+            fancybox=False, framealpha=0.8)
+    ax.set_box_aspect(1)
+    fig.savefig(fig_path, bbox_inches='tight', dpi=600)
+    plt.close()
+
+
+def plot_error_analysis_effectivity(RB_folder, solution_folder, fig_path):
+    error_file_path = os.path.join(RB_folder, solution_folder,
+                                   'error_analysis', 'error_analysis',
+                                   'solution_u_error.csv')
+    error_data = pd.read_csv(error_file_path, delimiter=';')
+    N = error_data[['N']].values.tolist()
+    max_error = error_data['max(error_u)'].values.tolist()
+    max_bound = error_data['max(error_estimator_u)'].values.tolist()
+    mean_error = error_data['gmean(error_u)'].values.tolist()
+    mean_bound = error_data['gmean(error_estimator_u)'].values.tolist()
+    eff_max = [max_bound[idx] / max_error[idx] for idx in range(len(N))]
+    eff_avg = [mean_bound[idx] / mean_error[idx] for idx in range(len(N))]
+    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(8, 7))
+    ax.plot(N,
+            eff_max,
+            '-bo',
+            linewidth=1.0,
+            markersize=8.5,
+            label='Max $\eta^N(\mu)$',
+            mfc='none')
+    ax.plot(N,
+            eff_avg,
+            '-r^',
+            linewidth=1.0,
+            markersize=8.5,
+            label='Average $\eta^N(\mu)$',
+            mfc='none')
+    font_size = fontsize
+    tick_size = fontsize
+    ax.set_xticks(N)
+    # ax.set_yscale('log')
+    ax.grid(color='black', linestyle='--', linewidth=0.5)
+    # ax.set_yticks([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14])
+    ax.set_xlabel(r'Number of basis functions $\textit{N}$',
+                  fontsize=font_size)
+    ax.set_ylabel(r'Effectivity factor $\eta^N(\mu)$', fontsize=font_size)
+    ax.tick_params(labelsize=tick_size)
+    ax.legend(fontsize=font_size, framealpha=0.4, loc='upper right')
+    ax.set_box_aspect(1)
+    fig.savefig(fig_path, bbox_inches='tight', dpi=600)
+    plt.close()
+
 
 # In[]
 
@@ -871,6 +1308,7 @@ class error_estimation():
         sample_size_RB,
         reduction_method,
         reduced_problem,
+        EIM_testing_set=None,
         **kwargs,
     ):
         self.corrector = corrector
@@ -910,12 +1348,12 @@ class error_estimation():
 
         # ----------------------------------------------------------------------
         # 5.1 Perform a manual error analysis
-        self.manualErrorAnalysis()
+        self._manualErrorAnalysis()
         # ----------------------------------------------------------------------
         # Perform an built-in error analysis to estimate
         # self.callErrorAnalysis()
 
-    def manualErrorAnalysis(self, ):
+    def _manualErrorAnalysis(self, ):
         # time_manual_error_analysis_start = time.time()
         manual_error_analysis(
             corrector=self.corrector,
@@ -943,438 +1381,6 @@ class error_estimation():
 
 # ==============================================================================
 # ==============================================================================
-
-# In[]
-def plot_sample_with_error_in_effecitivity(current_directory, RB_folder,
-                                           fig_path):
-    error_folder = os.path.join(current_directory, RB_folder,
-                                'manual_error_analysis')
-    error_data_list = os.listdir(error_folder)
-    N = len(error_data_list)
-    error_file_path = os.path.join(error_folder, '%s.csv' % N)
-    error_data = pd.read_csv(error_file_path)
-    effectivity_lower_one = error_data[error_data['effectivity'] < 1]
-    effectivity_larger_one = error_data[error_data['effectivity'] >= 1]
-
-    fig, ax = plt.subplots(1,1)
-    fig.set_figwidth(value_width)
-    ax.scatter(effectivity_larger_one['radius'],
-               effectivity_larger_one['K_fiber'],
-               marker='x',
-               c="blue",
-               s=100,
-               label='Effectivity $\geqslant 1$')
-    ax.scatter(effectivity_lower_one['radius'],
-               effectivity_lower_one['K_fiber'],
-               marker='o',
-               c="none",
-               edgecolors='red',
-               s=100,
-               linewidths=2.0,
-               label='Effectivity $< 1$')
-    font_size = 14
-    tick_size = 12
-    ax.grid(color='black', linestyle='--', linewidth=0.5)
-    ax.set_xlabel('radius $r$', fontsize=font_size)
-    ax.set_ylabel('$k_{\mathrm{f}}$', fontsize=font_size)
-    ax.legend(fontsize=12)
-    ax.tick_params(labelsize=tick_size)
-    ax.set_aspect('equal')
-    fig.savefig(fig_path, bbox_inches='tight', dpi=600)
-    plt.close()
-
-
-def plot_box_whisker(
-    current_directory,
-    RB_folder,
-    fig_path,
-    boxplot_data_path,
-    configuration=None,
-    plot_header='effectivity',
-):
-
-    def get_box_plot_data(N_list, bp):
-        rows_list = []
-        for i in range(len(N_list)):
-            dict1 = {}
-            dict1['N'] = N_list[i]
-            dict1['lower_whisker'] = bp['whiskers'][i * 2].get_ydata()[1]
-            dict1['lower_quartile'] = bp['boxes'][i].get_ydata()[1]
-            dict1['median'] = bp['medians'][i].get_ydata()[1]
-            dict1['upper_quartile'] = bp['boxes'][i].get_ydata()[2]
-            dict1['upper_whisker'] = bp['whiskers'][(i * 2) + 1].get_ydata()[1]
-            rows_list.append(dict1)
-        return pd.DataFrame(rows_list)
-
-    plt.rcParams['text.usetex'] = True
-
-    error_folder = os.path.join(current_directory, RB_folder,
-                                'manual_error_analysis')
-    error_data_list = os.listdir(error_folder)
-    N_list = [i + 1 for i in range(len(error_data_list))]
-    dict = {}
-    for N in N_list:
-        error_file_path = os.path.join(error_folder, '%s.csv' % N)
-        error_data = pd.read_csv(error_file_path)
-        eff = error_data[plot_header].values.tolist()
-        dict['%s' % N] = eff
-    fig, ax = plt.subplots(nrows=1,ncols=1)
-    fig.set_figwidth(value_width)
-    ax.set_box_aspect(1)
-    boxplot = ax.boxplot(dict.values(), showfliers=True)
-    font_size = fontsize
-    tick_size = fontsize
-    # ax.set_xticks(N)
-    # ax.set_yscale('log')
-    ax.grid(color='black', linestyle='--', linewidth=0.5)
-    ax.set_xlabel(r'Number of basis functions $\textit{N}$',
-                  fontsize=font_size)
-
-    ax.tick_params(labelsize=tick_size)
-    xleft, yright = ax.get_xlim()
-    interval = 3
-    ## =====================================================================
-    if interval == 2:
-        ## interval = 2
-        if yright % 2 == 0:
-            yright = yright + 2
-            # ax.set_xlim(0.0, yright)
-        else:
-            yright = yright + 1
-            # ax.set_xlim(0.0, yright)
-        ax.set_xticks(np.arange(0.0, yright, 2.0))
-        ax.set_xticklabels(np.arange(0.0, yright, 2.0, dtype=int))
-    ## =====================================================================
-    elif interval == 3:
-        ## interval = 3
-        if yright % 3 == 0:
-            yright = yright + 1
-            # ax.set_xlim(0.0, yright)
-        else:
-            yright = yright + 1
-            while yright % 3 == 0:
-                yright = yright + 1
-                # ax.set_xlim(0.0, yright)
-            # ax.set_xlim(0.0, yright)
-        ax.set_xticks(np.arange(0.0, yright, 3.0))
-        ax.set_xticklabels(np.arange(0.0, yright, 3.0, dtype=int))
-    ## =========================================================================
-    ## =========================================================================
-    # if yright % 2 == 0:
-    #     yright = yright + 2
-    #     # ax.set_xlim(0.0, yright)
-    # else:
-    #     yright = yright + 1
-    #     # ax.set_xlim(0.0, yright)
-    # ax.set_xticks(np.arange(0.0, yright, 2.0))
-    # ax.set_xticklabels(np.arange(0.0, yright, 2.0, dtype=int))
-    ## =========================================================================
-    ## =========================================================================
-
-    # locator = MultipleLocator(10)
-    # ax.xaxis.set_major_locator(locator)
-    # ax.xaxis.set_minor_locator(AutoMinorLocator())
-    # loc = plticker.MultipleLocator(
-    #     base=2.0)  # this locator puts ticks at regular intervals
-    # ax.xaxis.set_major_locator(loc)
-
-    if plot_header == 'effectivity':
-        ax.set_ylabel(r'Effectivity $\eta^{N}_\mathbb{V}(\mu)$', fontsize=font_size)
-        # ax.set_yticks(range(int(np.round(ymax, 0)) + 1))
-        if configuration == "Oliveira":
-            ax.set_ylim(0, 16)  # oliveira
-        if configuration == "Macedo":
-            ax.set_ylim(0, 45)  # macedo
-        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-    elif plot_header == 'residual_norm':
-        # ax.set_ylabel(r'Residual norm $\lVert \hat{r}_\delta (\mu) \rVert$',
-        ax.set_ylabel(r'Dual norm of residual $ \| \hat{r}_\delta (\mu) \|$',
-                      fontsize=font_size)
-        ax.set_yscale('log')
-    elif plot_header == 'residual_norm_squared':
-        ax.set_ylabel(
-            r'Squared of dual norm of residual $\| \hat{r}_\delta (\mu) \| ^2$',
-            fontsize=font_size)
-        ax.set_yscale('log')
-    # elif plot_header == 'SCM_alpha_LB':
-    #     ax.set_ylabel(r'Truth error $ \| e (\mu) \|_{\mathbb{V}} $',
-    #                   fontsize=font_size)
-    elif plot_header == 'error':  #\mathrm{\mathbb{}} ## error exact
-        ax.set_ylabel(r'Truth error $ \| e (\mu) \|_{\mathbb{V}} $',
-                      fontsize=font_size)
-        ax.set_yscale('log')
-        # ax.set_yticklabels([])
-    elif plot_header == 'error_estimator':
-        ax.set_ylabel(r'Error estimator $\Delta_{N} (\mu)$',
-                      fontsize=font_size)
-        ax.set_yscale('log')
-        # ax.set_yticklabels([])
-
-    # ax.set_ylim((0,12))
-    # ax.set_yticks([0, 1, 2, 3, 4, 5])
-    # ax.set_yticks(range(int(np.round(ymax, 0)) + 1))
-    # ax.yaxis.set_minor_locator(AutoMinorLocator())
-    # ax.set_yticks([0,5,10,15,20])
-    # ax.legend(fontsize=font_size)
-    fig.savefig(fig_path, bbox_inches='tight', dpi=600)
-    boxplot_data = get_box_plot_data(N_list, boxplot)
-    boxplot_data.to_csv(boxplot_data_path, index=False)
-    plt.close()
-
-
-# In[]
-
-
-def plot_error_analysis(current_directory, RB_folder, fig_path):
-    error_file_path = os.path.join(current_directory, RB_folder,
-                                   'error_analysis', 'error_analysis',
-                                   'solution_u_error.csv')
-    error_data = pd.read_csv(error_file_path, delimiter=';')
-    N = error_data['N'].values.tolist()
-    # print(f"N: {N}")
-    max_error = error_data['max(error_u)'].values.tolist()
-    # print(f"max_error: {max_error}")
-    max_bound = error_data['max(error_estimator_u)'].values.tolist()
-    # print(f"max_bound: {max_bound}")
-    mean_error = error_data['gmean(error_u)'].values.tolist()
-    # print(f"mean_error: {mean_error}")
-    mean_bound = error_data['gmean(error_estimator_u)'].values.tolist()
-    fig, ax = plt.subplots(nrows=1,ncols=1)
-    fig.set_figwidth(value_width)
-    ax.plot(N,
-            max_bound,
-            ':bo',
-            linewidth=3.0,
-            markersize=6.5,
-            label=r'Max $\Delta^{N}$')
-    ax.plot(N,
-            max_error,
-            '-bo',
-            linewidth=1.0,
-            markersize=8.5,
-            label=r'Max $||e||_X$',
-            mfc='none')
-    ax.plot(N,
-            mean_bound,
-            ':r^',
-            linewidth=3.0,
-            markersize=6.5,
-            label=r'Average $\Delta^{N}$')
-    ax.plot(N,
-            mean_error,
-            '-r^',
-            linewidth=1.0,
-            markersize=8.5,
-            label=r'Average $||e||_X$',
-            mfc='none')
-
-    font_size = fontsize
-    tick_size = fontsize
-    # ax.set_xticks(N)
-    xleft, yright = ax.get_xlim()
-    interval = 3
-    ## =====================================================================
-    if interval == 2:
-        ## interval = 2
-        if yright % 2 == 0:
-            yright = yright + 2
-            # ax.set_xlim(0.0, yright)
-        else:
-            yright = yright + 1
-            # ax.set_xlim(0.0, yright)
-        ax.set_xticks(np.arange(0.0, yright, 2.0))
-        ax.set_xticklabels(np.arange(0.0, yright, 2.0, dtype=int))
-    ## =====================================================================
-    elif interval == 3:
-        ## interval = 3
-        if yright % 3 == 0:
-            yright = yright + 1
-            # ax.set_xlim(0.0, yright)
-        else:
-            yright = yright + 1
-            while yright % 3 == 0:
-                yright = yright + 1
-                # ax.set_xlim(0.0, yright)
-            # ax.set_xlim(0.0, yright)
-        ax.set_xticks(np.arange(0.0, yright, 3.0))
-        ax.set_xticklabels(np.arange(0.0, yright, 3.0, dtype=int))
-    ## =========================================================================
-
-    ax.set_xticks(np.arange(0.0, yright, 2.0))
-    ax.set_xticklabels(np.arange(0.0, yright, 2.0, dtype=int))
-
-    # loc = plticker.MultipleLocator(
-    #     base=2.0)  # this locator puts ticks at regular intervals
-    # ax.xaxis.set_major_locator(loc)
-
-    ax.set_yscale('log')
-    ax.grid(color='black', linestyle='--', linewidth=0.5)
-    # ax.set_yticks([1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 1e1])
-    ax.set_xlabel(r'Number of basis functions $\textit{N}$',
-                  fontsize=font_size)
-    ax.set_ylabel(r'Absolute error', fontsize=font_size)
-    ax.tick_params(labelsize=tick_size)
-    ax.legend(fontsize=font_size)
-    # plt.show()
-    ax.set_box_aspect(1)
-    fig.savefig(fig_path, bbox_inches='tight', dpi=600)
-    plt.close()
-
-
-def plot_error_analysis_manual(
-    current_directory,
-    RB_folder,
-    fig_path,
-):
-    plt.rcParams['text.usetex'] = True
-
-    error_folder = os.path.join(current_directory, RB_folder,
-                                'manual_error_analysis')
-    error_data_list = os.listdir(error_folder)
-    N_list = [i + 1 for i in range(len(error_data_list))]
-    max_error_u_list, max_error_estimator_u_list = [], []
-    gmean_error_u_list, gmean_error_estimator_u_list = [], []
-
-    for plot_header in ["error", "error_estimator"]:
-        for N in N_list:
-            error_file_path = os.path.join(error_folder, '%s.csv' % N)
-            error_data = pd.read_csv(error_file_path)
-            mean_error = np.average(error_data[plot_header].values.tolist())
-            max_error = np.amax(error_data[plot_header].values.tolist())
-            if plot_header == "error":
-                max_error_u_list.append(max_error)
-                gmean_error_u_list.append(mean_error)
-            elif plot_header == "error_estimator":
-                max_error_estimator_u_list.append(max_error)
-                gmean_error_estimator_u_list.append(mean_error)
-
-    # original from here
-    N = N_list
-
-    fig, ax = plt.subplots(nrows=1,ncols=1)
-    fig.set_figwidth(value_width)
-    # 'max(error_estimator_u)' : max error bound
-    ax.plot(N,
-            max_error_estimator_u_list,
-            ':bo',
-            linewidth=3.0,
-            markersize=6.5,
-            label=r'Max $\Delta^{N}$')
-    # 'max(error_u)' : max truth error
-    ax.plot(N,
-            max_error_u_list,
-            '-bo',
-            linewidth=1.0,
-            markersize=8.5,
-            label=r'Max $||e||_X$',
-            mfc='none')
-    # 'gmean(error_estimator_u)' : mean error bound
-    ax.plot(N,
-            gmean_error_estimator_u_list,
-            ':r^',
-            linewidth=3.0,
-            markersize=6.5,
-            label=r'Average $\Delta^{N}$')
-    # 'gmean(error_u)' : mean truth error
-    ax.plot(N,
-            gmean_error_u_list,
-            '-r^',
-            linewidth=1.0,
-            markersize=8.5,
-            label=r'Average $||e||_X$',
-            mfc='none')
-
-    font_size = fontsize
-    tick_size = fontsize
-    ax.set_xticks(N)
-    ax.set_yscale('log')
-    ax.grid(color='black', linestyle='--', linewidth=0.5)
-    # ax.set_yticks([1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1, 1e1])
-    ax.set_xlabel(r'Number of basis functions $\textit{N}$',
-                  fontsize=font_size)
-    ax.set_ylabel(r'Absolute error', fontsize=font_size)
-    ax.tick_params(labelsize=tick_size)
-    xleft, yright = ax.get_xlim()
-    interval = 3
-    ## =====================================================================
-    if interval == 2:
-        ## interval = 2
-        if yright % 2 == 0:
-            yright = yright + 2
-            # ax.set_xlim(0.0, yright)
-        else:
-            yright = yright + 1
-            # ax.set_xlim(0.0, yright)
-        ax.set_xticks(np.arange(0.0, yright, 2.0))
-        ax.set_xticklabels(np.arange(0.0, yright, 2.0, dtype=int))
-    ## =====================================================================
-    elif interval == 3:
-        ## interval = 3
-        if yright % 3 == 0:
-            yright = yright + 1
-            # ax.set_xlim(0.0, yright)
-        else:
-            yright = yright + 1
-            while yright % 3 == 0:
-                yright = yright + 1
-                # ax.set_xlim(0.0, yright)
-            # ax.set_xlim(0.0, yright)
-        ax.set_xticks(np.arange(0.0, yright, 3.0))
-        ax.set_xticklabels(np.arange(0.0, yright, 3.0, dtype=int))
-    ## =========================================================================
-
-
-    ax.tick_params(labelsize=tick_size)
-    # ax.legend(fontsize=16, framealpha=0.4, loc='upper right')
-    ax.legend(ncol=2, bbox_to_anchor=(0.05, 1.2, 1., .102), fontsize=fontsize-3,
-            fancybox=False, framealpha=0.8)
-    ax.set_box_aspect(1)
-    fig.savefig(fig_path, bbox_inches='tight', dpi=600)
-    plt.close()
-
-
-def plot_error_analysis_effectivity(RB_folder, solution_folder, fig_path):
-    error_file_path = os.path.join(RB_folder, solution_folder,
-                                   'error_analysis', 'error_analysis',
-                                   'solution_u_error.csv')
-    error_data = pd.read_csv(error_file_path, delimiter=';')
-    N = error_data[['N']].values.tolist()
-    max_error = error_data['max(error_u)'].values.tolist()
-    max_bound = error_data['max(error_estimator_u)'].values.tolist()
-    mean_error = error_data['gmean(error_u)'].values.tolist()
-    mean_bound = error_data['gmean(error_estimator_u)'].values.tolist()
-    eff_max = [max_bound[idx] / max_error[idx] for idx in range(len(N))]
-    eff_avg = [mean_bound[idx] / mean_error[idx] for idx in range(len(N))]
-    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(8, 7))
-    ax.plot(N,
-            eff_max,
-            '-bo',
-            linewidth=1.0,
-            markersize=8.5,
-            label='Max $\eta^N(\mu)$',
-            mfc='none')
-    ax.plot(N,
-            eff_avg,
-            '-r^',
-            linewidth=1.0,
-            markersize=8.5,
-            label='Average $\eta^N(\mu)$',
-            mfc='none')
-    font_size = fontsize
-    tick_size = fontsize
-    ax.set_xticks(N)
-    # ax.set_yscale('log')
-    ax.grid(color='black', linestyle='--', linewidth=0.5)
-    # ax.set_yticks([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14])
-    ax.set_xlabel(r'Number of basis functions $\textit{N}$',
-                  fontsize=font_size)
-    ax.set_ylabel(r'Effectivity factor $\eta^N(\mu)$', fontsize=font_size)
-    ax.tick_params(labelsize=tick_size)
-    ax.legend(fontsize=font_size, framealpha=0.4, loc='upper right')
-    ax.set_box_aspect(1)
-    fig.savefig(fig_path, bbox_inches='tight', dpi=600)
-    plt.close()
-
 
 
 
