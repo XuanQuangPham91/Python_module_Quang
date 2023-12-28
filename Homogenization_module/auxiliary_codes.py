@@ -58,6 +58,9 @@ start = time.time()
 def check_create_dir(data_RB_path):
     if os.path.exists(data_RB_path) == False:
         os.mkdir(data_RB_path)
+        print(f"check_create_dir: mkdir {data_RB_path}:")
+    print(f"check_create_dir: all good")
+
 
 def delete_model(delete_state=False, modelName=""):
     if delete_state and os.path.isdir(modelName):
@@ -127,7 +130,10 @@ class PeriodicBoundary(SubDomain):
             y[1] = x[1] - self.L
 
 
-# In[]
+# In[] =========================================================================
+"""
+MESH OPERATORS
+"""
 
 
 def RBniCS_convert_mesh(solution_path, mesh_path):
@@ -150,6 +156,27 @@ def RBniCS_convert_mesh(solution_path, mesh_path):
 
     return mesh
 
+def read_xdmf_mesh(xdmf_file_path, mesh_xml_file_path):
+    mesh = Mesh(MPI.comm_world)
+    f = XDMFFile(
+        MPI.comm_world,  # MPI.comm_world  mpi_comm_world()
+        xdmf_file_path)
+    f.read(mesh, True)
+    File(mesh_xml_file_path) << mesh
+    plot(mesh)
+    return mesh
+
+
+def read_hdf5_mesh(hdf5_file_path, mesh_xml_file_path):
+    mesh = Mesh(MPI.comm_world)
+    f = HDF5File(
+        MPI.comm_world,  # MPI.comm_world  mpi_comm_world()
+        hdf5_file_path,
+        "r")
+    f.read(mesh, False)
+    File(mesh_xml_file_path) << mesh
+    plot(mesh)
+    return mesh
 
 # In[]
 
@@ -157,10 +184,10 @@ def RBniCS_convert_mesh(solution_path, mesh_path):
 def my_plot(
     u,
     path='solution/',
-    title='missed title',
     xlabel=r'$x_1$',
     ylabel=r'$x_2$',
     format='pdf',
+    title=None,
     mode=None,
 ):
     fig, ax = plt.subplots(nrows=1, ncols=1)
@@ -173,12 +200,16 @@ def my_plot(
     # plt.axis('tight')
     # plt.legend()
     ax.grid(True)
-    # ax.set_title(title, fontsize=fontsize)
+    if title == None:
+        print("Error: Missed title. Function: my_plot")
+    else:
+        # ax.set_title(title, fontsize=15)
+        pass    
     ax.set_xlabel(xlabel, fontsize=fontsize)
     ax.set_ylabel(ylabel, fontsize=fontsize)
     ax.set_box_aspect(1)
 
-    fig.savefig(f'{path}.{format}',
+    fig.savefig(f'{path}/{title}.{format}',
                 format=format,
                 bbox_inches='tight',
                 dpi=600)
