@@ -72,6 +72,7 @@ try:
         RBniCS_convert_mesh,
         my_plot,
         plot_greedy,
+        plot_greedy_deim,
         plot_sample_with_error_in_effecitivity,
         plot_box_whisker,
         plot_error_analysis,
@@ -79,6 +80,7 @@ try:
         plot_error_analysis_effectivity,
         manual_error_analysis,
         basis_function_grad,
+        relocation_offset_text,
         # Class ================================================================
         Logger,
         PeriodicBoundary,

@@ -31,7 +31,7 @@ rc('text', usetex=True)
 # matplotlib.rcParams['text.latex.preamble'] = r'\usepackage{amsfonts}'
 matplotlib.rcParams['text.latex.preamble'] = r'\usepackage{amsfonts,amsmath,amssymb}'
 
-fontsize = 21
+fontsize = 18
 matplotlib.rc('xtick', labelsize=fontsize)
 matplotlib.rc('ytick', labelsize=fontsize)
 
@@ -59,7 +59,7 @@ def check_create_dir(data_RB_path):
     if os.path.exists(data_RB_path) == False:
         os.mkdir(data_RB_path)
         print(f"check_create_dir: mkdir {data_RB_path}:")
-    print(f"check_create_dir: all good")
+    # print(f"check_create_dir: all good")
 
 
 def delete_model(delete_state=False, modelName=""):
@@ -204,7 +204,7 @@ def my_plot(
         print("Error: Missed title. Function: my_plot")
     else:
         # ax.set_title(title, fontsize=15)
-        pass    
+        pass    gi
     ax.set_xlabel(xlabel, fontsize=fontsize)
     ax.set_ylabel(ylabel, fontsize=fontsize)
     ax.set_box_aspect(1)
@@ -247,7 +247,7 @@ def plot_greedy(
 
         N_list_affine = [i for i in range(len(greedy_rel_error))]
         max_N_list_affine_list.append(max(N_list_affine))
-        color_list = ['-ro', '--b^', '-.gs']
+        color_list = ['-o', '-v', '-^', '-<', '->']
         ax.plot(
             N_list_affine,
             greedy_rel_error,
@@ -287,7 +287,73 @@ def plot_greedy(
     plt.close('all')
 
 
+def plot_greedy_deim(
+    RB_folder,
+    fig_path,
+    legend=None,
+):
+    fig, ax = plt.subplots(
+        nrows=1,
+        ncols=1,
+        # figsize=(5, 5),
+    )
+    fig.set_figwidth(value_width)
+    max_N_list_affine_list = []
+    for i_folder in range(len(RB_folder)):
+
+        greedy_abs_erronu_f_file_path = os.path.join(
+            RB_folder[i_folder], 'post_processing', 'error_max.txt')
+        with open(greedy_abs_erronu_f_file_path, 'r') as f:
+            greedy_abs_error = json.loads(f.read())
+        greedy_rel_error = []
+
+        for i, error in enumerate(greedy_abs_error):
+            if i == 0:
+                greedy_rel_error.append(1)
+            else:
+                greedy_rel_error.append(greedy_abs_error[i] /
+                                        greedy_abs_error[0])
+
+        N_list_affine = [i for i in range(len(greedy_rel_error))]
+        max_N_list_affine_list.append(max(N_list_affine))
+        color_list = ['-o', '-v', '-^', '-<', '->']
+        ax.plot(
+            N_list_affine,
+            greedy_rel_error,
+            color_list[i_folder],
+            linewidth=1.5,
+            markersize=7.5,
+            alpha=0.7,
+        )
+    if legend == None:
+        pass
+    else:
+        ax.legend(legend, ncol=1, bbox_to_anchor=(1.02, 1.02), 
+               fontsize=fontsize, fancybox=True, framealpha=0.9)
+    ax.set_yscale('log')
+    ax.grid(True)
+    # ax.grid(color='black', linestyle='--', linewidth=0.5)
+    # ax.set_yticks([1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1])
+    # ax.set_title(r"{title}".format(title=title), fontsize=fontsize)
+
+    if (N_list_affine[-1] % 2) == 0:
+        ax.set_xlim(-0.25, max(max_N_list_affine_list) + 1.25)
+    else:
+        ax.set_xlim(-0.25, max(max_N_list_affine_list) + 0.25)
+    # ax.set_xlim(-0.25, 14.25)
+
+    ax.set_xlabel(r'number of basis functions $\textit{N}$', fontsize=fontsize)
+    ax.set_yticks([1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1])
+    ax.set_ylabel(r'Maximum error', fontsize=fontsize)
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+
+    ax.set_box_aspect(1)
+    ax.tick_params(labelsize=fontsize)
+    fig.savefig(fig_path, bbox_inches='tight', dpi=600)
+    plt.show(block=False)
+    plt.close('all')
 # return greedy_rel_error
+
 
 # In[]
 def plot_sample_with_error_in_effecitivity(current_directory, RB_folder,
@@ -377,32 +443,40 @@ def plot_box_whisker(
 
     ax.tick_params(labelsize=tick_size)
     xleft, yright = ax.get_xlim()
-    interval = 3
-    ## =====================================================================
-    if interval == 2:
-        ## interval = 2
-        if yright % 2 == 0:
+    interval = 5
+    if yright % interval == 0:
             yright = yright + 2
             # ax.set_xlim(0.0, yright)
-        else:
-            yright = yright + 1
-            # ax.set_xlim(0.0, yright)
-        ax.set_xticks(np.arange(0.0, yright, 2.0))
-        ax.set_xticklabels(np.arange(0.0, yright, 2.0, dtype=int))
-    ## =====================================================================
-    elif interval == 3:
-        ## interval = 3
-        if yright % 3 == 0:
-            yright = yright + 1
-            # ax.set_xlim(0.0, yright)
-        else:
-            yright = yright + 1
-            while yright % 3 == 0:
-                yright = yright + 1
-                # ax.set_xlim(0.0, yright)
-            # ax.set_xlim(0.0, yright)
-        ax.set_xticks(np.arange(0.0, yright, 3.0))
-        ax.set_xticklabels(np.arange(0.0, yright, 3.0, dtype=int))
+    else:
+        yright = yright + interval
+        # ax.set_xlim(0.0, yright)
+    ax.set_xticks(np.arange(0.0, yright, interval))
+    ax.set_xticklabels(np.arange(0.0, yright, interval, dtype=int))
+    # ## =====================================================================
+    # if interval == 2:
+    #     ## interval = 2
+    #     if yright % 2 == 0:
+    #         yright = yright + 2
+    #         # ax.set_xlim(0.0, yright)
+    #     else:
+    #         yright = yright + 1
+    #         # ax.set_xlim(0.0, yright)
+    #     ax.set_xticks(np.arange(0.0, yright, 2.0))
+    #     ax.set_xticklabels(np.arange(0.0, yright, 2.0, dtype=int))
+    # ## =====================================================================
+    # elif interval == 3:
+    #     ## interval = 3
+    #     if yright % 3 == 0:
+    #         yright = yright + 1
+    #         # ax.set_xlim(0.0, yright)
+    #     else:
+    #         yright = yright + 1
+    #         while yright % 3 == 0:
+    #             yright = yright + 1
+    #             # ax.set_xlim(0.0, yright)
+    #         # ax.set_xlim(0.0, yright)
+    #     ax.set_xticks(np.arange(0.0, yright, 3.0))
+    #     ax.set_xticklabels(np.arange(0.0, yright, 3.0, dtype=int))
     ## =========================================================================
     ## =========================================================================
     # if yright % 2 == 0:
@@ -580,7 +654,9 @@ def plot_error_analysis_manual(
     max_error_u_list, max_error_estimator_u_list = [], []
     gmean_error_u_list, gmean_error_estimator_u_list = [], []
 
-    for plot_header in ["error", "error_estimator"]:
+    for plot_header in ["error", 
+                        # "error_estimator",
+                        ]:
         for N in N_list:
             error_file_path = os.path.join(error_folder, '%s.csv' % N)
             error_data = pd.read_csv(error_file_path)
@@ -593,41 +669,43 @@ def plot_error_analysis_manual(
                 max_error_estimator_u_list.append(max_error)
                 gmean_error_estimator_u_list.append(mean_error)
 
-    # original from here
-    N = N_list
+        # original from here
+        N = N_list
 
-    fig, ax = plt.subplots(nrows=1,ncols=1)
-    fig.set_figwidth(value_width)
-    # 'max(error_estimator_u)' : max error bound
-    ax.plot(N,
-            max_error_estimator_u_list,
-            ':bo',
-            linewidth=3.0,
-            markersize=6.5,
-            label=r'Max $\Delta^{N}$')
-    # 'max(error_u)' : max truth error
-    ax.plot(N,
-            max_error_u_list,
-            '-bo',
-            linewidth=1.0,
-            markersize=8.5,
-            label=r'Max $||e||_X$',
-            mfc='none')
-    # 'gmean(error_estimator_u)' : mean error bound
-    ax.plot(N,
-            gmean_error_estimator_u_list,
-            ':r^',
-            linewidth=3.0,
-            markersize=6.5,
-            label=r'Average $\Delta^{N}$')
-    # 'gmean(error_u)' : mean truth error
-    ax.plot(N,
-            gmean_error_u_list,
-            '-r^',
-            linewidth=1.0,
-            markersize=8.5,
-            label=r'Average $||e||_X$',
-            mfc='none')
+        fig, ax = plt.subplots(nrows=1,ncols=1)
+        fig.set_figwidth(value_width)
+        if plot_header == "error":
+            # 'max(error_estimator_u)' : max error bound
+            ax.plot(N,
+                    max_error_u_list,
+                    '-bo',
+                    linewidth=1.0,
+                    markersize=8.5,
+                    label=r'Max $||e||_X$',
+                    mfc='none')
+            # 'gmean(error_u)' : mean truth error
+            ax.plot(N,
+                    gmean_error_u_list,
+                    '-r^',
+                    linewidth=1.0,
+                    markersize=8.5,
+                    label=r'Average $||e||_X$',
+                    mfc='none')
+        elif plot_header == "error_estimator":
+            # 'gmean(error_estimator_u)' : mean error bound
+            ax.plot(N,
+                    max_error_estimator_u_list,
+                    ':bo',
+                    linewidth=3.0,
+                    markersize=6.5,
+                    label=r'Max $\Delta^{N}$')
+            # 'max(error_u)' : max truth error
+            ax.plot(N,
+                    gmean_error_estimator_u_list,
+                    ':r^',
+                    linewidth=3.0,
+                    markersize=6.5,
+                    label=r'Average $\Delta^{N}$')
 
     font_size = fontsize
     tick_size = fontsize
@@ -993,7 +1071,7 @@ def manual_error_analysis(
     configuration, corrector, 
     problem, reduction_method,
     reduced_problem, test_file_folder,folder_path,
-    type_manual_error_analysis = "4params_w_Radius", 
+    type_manual_error_analysis = "5params_w_Radius", 
     ):
     """
     # type_manual_error_analysis:=
@@ -1219,6 +1297,107 @@ def manual_error_analysis(
             data_path = os.path.join(folder_path, '%s.csv' % str(n))
             df.to_csv(data_path, index=False)
 
+    elif type_manual_error_analysis ==  "5params_w_Radius":
+        list_range = 8
+        print(f"Manual Error Analysis: {configuration}-{corrector}")
+        if os.path.isdir(folder_path):
+            pass
+        else:
+            os.makedirs(folder_path)
+        reduction_method.testing_set.load(test_file_folder, "testing_set")
+        mu_set = reduction_method.testing_set
+        for n in N_generator(reduced_problem):
+            time_per_basis_start = time.time()
+            exact_list, bound_list, effectivity_list = [], [], []
+            exact_alpha_LB_list, SCM_alpha_LB_list = [], []
+            residual_norm_list, residual_norm_squared_list = [], []
+            # ======================================================================
+            r_list = [mu[0] for mu in mu_set]
+            E_f_list = [mu[1] for mu in mu_set]
+            E_m_list = [mu[2] for mu in mu_set]
+            nu_f_list = [mu[3] for mu in mu_set]
+            nu_m_list = [mu[4] for mu in mu_set]
+            # ======================================================================
+            time_online, time_alphalowerbound, time_exact, time_bound = [], [], [],[]
+            time_per_basis, time_per_mu = [], []
+
+            error_list, error_estimator_list, \
+                relative_error_list, relative_error_estimator_list, \
+                effectivity_list, residual_norm_squared_list, \
+                SCM_alphaLB_list, errorTruth_alphaLB_list = (
+                [] for i in range(list_range))
+
+            for mu in mu_set:
+                time_online_start = time.time()
+                reduced_problem.set_mu(mu)
+                reduced_problem.solve(n)
+                time_online.append(time.time() - time_online_start)
+
+                # Save the residual norm squared
+                residual_norm_squared = reduced_problem.get_residual_norm_squared()
+                residual_norm_squared_list.append(residual_norm_squared)
+
+                residual_norm = sqrt(abs(residual_norm_squared))
+                residual_norm_list.append(residual_norm)
+
+                # print(f'residual_norm_squared: {residual_norm_squared}')
+
+                # Save the alpha lower bound
+                # time_alphalowerbound_start = time.time()
+                # exact_alpha_LB = reduced_problem.evaluate_stability_factor()
+                # SCM_approximation.get_stability_factor_upper_bound()
+                # SCM_alpha_LB = reduced_problem.get_stability_factor_lower_bound()
+                # time_alphalowerbound.append(time.time() -
+                #                             time_alphalowerbound_start)
+
+                # exact_alpha_LB = problem.evaluate_stability_factor(
+                # )  # exact alpha p.34 p44. 4.25
+                # SCM_alpha_LB = problem.get_stability_factor_lower_bound()
+                # exact_alpha_LB_list.append(exact_alpha_LB)
+                # SCM_alpha_LB_list.append(SCM_alpha_LB)
+
+                # Save the error bound and effectivity
+                time_exact_start = time.time()
+                exact = reduced_problem.compute_error()  # true (exact) error
+                time_exact.append(time.time() - time_exact_start)
+
+                time_bound_start = time.time()
+                bound = reduced_problem.estimate_error()  # error bound
+                time_bound.append(time.time() - time_bound_start)
+
+                effectivity = bound / exact
+                exact_list.append(exact)
+                bound_list.append(bound)
+                effectivity_list.append(effectivity)
+
+                time_per_mu.append(time.time() - time_online_start)
+
+            time_per_basis = (time.time() - time_per_basis_start)
+
+            data = {
+                "r_list": r_list,
+                "E_f_list": E_f_list,
+                "E_m_list": E_m_list,
+                "nu_f_list": nu_f_list,
+                "nu_m_list": nu_m_list,
+                "exact": exact_list,
+                "bound": bound_list,  # error_estimator
+                "effectivity": effectivity_list,
+                # "exact_alpha_LB": exact_alpha_LB_list,
+                # "SCM_alpha_LB": SCM_alpha_LB_list,
+                "residual_norm_squared": residual_norm_squared_list,
+                "residual_norm": residual_norm_list,
+                "time_online": time_online,
+                # "time_alphalowerbound": time_alphalowerbound,
+                "time_exact": time_exact,
+                # "time_error_bound": time_bound,
+                # "time_per_mu": time_per_mu,
+                # "time_per_basis": time_per_basis
+            }
+            # data[time_online] = time_online
+            df = pd.DataFrame(data)
+            data_path = os.path.join(folder_path, '%s.csv' % str(n))
+            df.to_csv(data_path, index=False)
     # ==============================================================================
     # ==============================================================================
     # ==============================================================================
@@ -1332,6 +1511,7 @@ class error_estimation():
 
     def __init__(
         self,
+        configuration,
         corrector,
         modelName,
         mu_range,
@@ -1339,9 +1519,10 @@ class error_estimation():
         sample_size_RB,
         reduction_method,
         reduced_problem,
-        EIM_testing_set=None,
+        EIM_testing_set,
         **kwargs,
     ):
+        self.configuration = configuration
         self.corrector = corrector
         self.modelName = modelName
         self.sample_size_RB = sample_size_RB
@@ -1379,36 +1560,30 @@ class error_estimation():
 
         # ----------------------------------------------------------------------
         # 5.1 Perform a manual error analysis
-        self._manualErrorAnalysis()
+        self._manual_error_analysis()
         # ----------------------------------------------------------------------
         # Perform an built-in error analysis to estimate
         # self.callErrorAnalysis()
 
-    def _manualErrorAnalysis(self, ):
-        # time_manual_error_analysis_start = time.time()
+    def _manual_error_analysis(self, ):
+        time_manual_error_analysis_start = time.time()
         manual_error_analysis(
+            configuration=self.configuration,
             corrector=self.corrector,
             problem=self.problem,
             reduced_problem=self.reduced_problem,
             reduction_method=self.reduction_method,
             test_file_folder=self.test_folder_path,
             folder_path=self.folder_path,
-            sample_size_RB=self.sample_size_RB,
-        )
-        # time_series["manual_error_analysis_{corrector}"] = (
-        #     time.time() - time_manual_error_analysis_start)
+            type_manual_error_analysis = "radiusOnly",
+            )
+        print(f"manual_error_analysis w{self.corrector}: {time.time() - time_manual_error_analysis_start}")
 
-        # # posteriori_error_end = time.time()
-        # print(
-        #     f"- error analysis - {configuration} - {corrector}: {time.time() - posteriori_error_start} s-"
-        # )
-        # time_series["total error analysis {corrector}"] = (
-        #     time.time() - time_manual_error_analysis_start)
-
-    def callErrorAnalysis(self, ):
+    def _callErrorAnalysis(self, ):
         # 5.2 Perform an built-in error analysis to estimate
         # print("5.2 Perform an built-in error analysis to estimate")
         self.reduction_method.error_analysis(filename=f"error_analysis")
+
 
 # ==============================================================================
 # ==============================================================================
@@ -1481,3 +1656,14 @@ def basis_function_grad(V, reduced_problem, grad, modelName):
     reduced_problem.basis_functions.save(directory=directory, filename="basis")
 
     return _basis_function_grad
+
+
+def relocation_offset_text(ax, x=1, y=-0.1, size=fontsize):
+    ax.get_xaxis().get_offset_text().set_visible(False)
+    ax_max = max(ax.get_xticks())
+    exponent_axis = np.floor(np.log10(ax_max)).astype(int)
+    ax.annotate(r'$\times$10$^{%i}$'%(exponent_axis),
+                xy=(x, y), 
+                xycoords='axes fraction',
+                size=size
+                )
