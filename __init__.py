@@ -84,7 +84,9 @@ try:
         # Class ================================================================
         Logger,
         PeriodicBoundary,
+        PeriodicBoundary3D,
         error_estimation,
+        Pinpoint,
     )
 except:
     print('Failed to import Homogenization_module.auxiliary_codes')
@@ -94,7 +96,7 @@ try:
     from Python_module_Quang.Homogenization_module.LatinHyperCube_sampling import (
         # Function =============================================================
         sample_set_RBniCS_formater,
-        Latin_Hypercube_sampling,
+        _Latin_Hypercube_sampling,
         Latin_Hypercube_sampling_func,
         # Class ================================================================
     )

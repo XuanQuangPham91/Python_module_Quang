@@ -110,7 +110,7 @@ def sample_set_RBniCS_formater(inv_sample):
 #         os.mkdir(data_RB_path)
 
 
-def Latin_Hypercube_sampling(
+def _Latin_Hypercube_sampling(
     mu_range,
     data_path,
     random_state=None,
@@ -175,7 +175,7 @@ def Latin_Hypercube_sampling_func(
         check_create_dir(data_RB_path)
 
         # RB sample set
-        Latin_Hypercube_sampling(
+        _Latin_Hypercube_sampling(
             mu_range=mu_range,
             random_state=random_state_RB,
             sample_size=sample_size_RB,
@@ -208,15 +208,18 @@ if __name__ == "__main__":
     sample_size_RB_training = 100
     sample_size_RB_testing = 40
     for sample_size_RB in [
-            # sample_size_RB_training,
-            sample_size_RB_testing,
+            sample_size_RB_training,
+            # sample_size_RB_testing,
     ]:
         if sample_size_RB == sample_size_RB_training:
             type_of_sample_set = "training_set"
         else:
             type_of_sample_set = "testing_set"
+        corrector = 11
+        N = 30
+        modelName = f"ElasticBlock_EIM_{corrector}_N{N}"
         Latin_Hypercube_sampling_func(
-            modelName="ElasticBlock_1",
+            modelName=modelName,
             sample_size_RB=sample_size_RB,
             mu_range=mu_range,
             type_of_sample_set=type_of_sample_set,

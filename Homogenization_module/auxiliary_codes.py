@@ -107,27 +107,344 @@ class PeriodicBoundary(SubDomain):
         # return True if on left or bottom boundary AND NOT on one of 
         # the two corners (0, 1) and (1, 0)
         self.L = 1.0
+        self.d = 0.5
         Move = [0.0, 0.0]  # at center of coordinate system
-        self.x1 = [-self.L/2 + Move[0], -self.L/2 + Move[1]]
-        self.x2 = [-self.L/2 + Move[0], +self.L/2 + Move[1]]
-        self.x3 = [+self.L/2 + Move[0], +self.L/2 + Move[1]]
-        self.x4 = [+self.L/2 + Move[0], -self.L/2 + Move[1]]
-        return bool((near(x[0], self.x1[0]) or near(x[1], self.x1[1]))
-                    and (not ((near(x[0], self.x2[0]) and near(x[1], self.x2[1])) or
-                              (near(x[0], self.x4[0]) and near(x[1], self.x4[1]))))
+        self.p1 = [-self.d + Move[0], -self.d + Move[1]]
+        self.p2 = [-self.d + Move[0], +self.d + Move[1]]
+        self.p3 = [+self.d + Move[0], +self.d + Move[1]]
+        self.p4 = [+self.d + Move[0], -self.d + Move[1]]
+        return bool((near(x[0], self.p1[0]) or near(x[1], self.p1[1]))
+                    and (not ((near(x[0], self.p2[0]) and near(x[1], self.p2[1])) or
+                              (near(x[0], self.p4[0]) and near(x[1], self.p4[1]))))
                     and on_boundary)
 
     def map(self, x, y):
-        if near(x[0], self.x3[0]) and near(x[1], self.x3[0]):
+        if near(x[0], self.p3[0]) and near(x[1], self.p3[0]):
             y[0] = x[0] - self.L
             y[1] = x[1] - self.L
-        elif near(x[0], self.x3[0]):
+        elif near(x[0], self.p3[0]):
             y[0] = x[0] - self.L
             y[1] = x[1]
-        elif near(x[1], self.x3[1]):
+        elif near(x[1], self.p3[1]):
             # else:  # near(x[1], 1)
             y[0] = x[0]
             y[1] = x[1] - self.L
+
+class PeriodicBoundary3D(SubDomain):
+    def inside(self, x, on_boundary):
+        # Node association is made in e different stages: corners, edges, faces
+        # return True if on left or bottom or front boundary
+        # AND NOT on every pair of slave edges
+        Move = [0.0, 0.0, 0.0]  # at center of coordinate system
+        self.L = 1.0
+        self.d = 0.5
+        # 
+        self.p1 = [-self.d, -self.d, -self.d]
+        self.p2 = [-self.d, -self.d, +self.d]
+        self.p3 = [-self.d, +self.d, +self.d]
+        self.p4 = [-self.d, +self.d, -self.d]
+        self.p5 = [+self.d, -self.d, -self.d]
+        self.p6 = [+self.d, -self.d, +self.d]
+        self.p7 = [+self.d, +self.d, +self.d]
+        self.p8 = [+self.d, +self.d, -self.d]
+        return bool(
+            (near(x[0], self.p1[0]) or near(x[1], self.p1[1]) or near(x[2], self.p1[2]))
+            # # plane x - y
+            # and (not ((near(x[0], 1.) and near(x[1], 0.)) or
+            #           (near(x[0], 0.) and near(x[1], 1.))))
+            # # plane x - z
+            # and (not ((near(x[0], 1.) and near(x[2], 0.)) or
+            #           (near(x[0], 0.) and near(x[2], 1.))))
+            # # plane y - z
+            # and (not ((near(x[1], 1.) and near(x[2], 0.)) or
+            #           (near(x[1], 0.) and near(x[2], 1.))))
+            and (not (
+                # slave edges of plane x
+                (near(x[0], -self.d) and near(x[1], self.d)) or
+                (near(x[0], -self.d) and near(x[2], self.d)) or
+                # slave edges of plane y
+                (near(x[1], -self.d) and near(x[0], self.d)) or
+                (near(x[1], -self.d) and near(x[2], self.d)) or
+                # slave edges of plane z
+                (near(x[2], -self.d) and near(x[0], self.d)) or
+                (near(x[2], -self.d) and near(x[1], self.d))
+                # (near(x[0], 0.) and near(x[1], 0.) and near(x[2], 1.)) or
+                # (near(x[0], 0.) and near(x[1], 1.) and near(x[2], 0.)) or
+                # (near(x[0], 1.) and near(x[1], 1.) and near(x[2], 1.))
+            ))
+            and on_boundary)
+
+    def map(self, x, y):
+        # Conners --------------------------------------------------------------
+        # p2 = [-self.d + Move[0], -self.d + Move[1], +self.d + Move[2]]
+        if near(x[0], self.p2[0]) and near(x[1], self.p2[1]) and near(x[2], self.p2[2]):
+            y[0] = x[0]
+            y[1] = x[1]
+            y[2] = x[2] - self.L
+        # p3 = [-self.d + Move[0], +self.d + Move[1], +self.d + Move[2]]
+        elif near(x[0], self.p3[0]) and near(x[1], self.p3[1]) and near(x[2], self.p3[2]):
+            y[0] = x[0]
+            y[1] = x[1] - self.L
+        # p4 = [-self.d + Move[0], +self.d + Move[1], -self.d + Move[2]]
+        elif near(x[0], self.p4[0]) and near(x[1], self.p4[1]) and near(x[2], self.p4[2]):
+            y[0] = x[0]
+            y[1] = x[1] - self.L
+            y[2] = x[2]
+        # p5 = [self.d + Move[0], -self.d + Move[1], -self.d + Move[2]]
+        elif near(x[0], self.p5[0]) and near(x[1], self.p5[1]) and near(x[2], self.p5[2]):
+            y[0] = x[0] - self.L
+            y[1] = x[1]
+            y[2] = x[2]
+        # p6 = [self.d + Move[0], -self.d + Move[1], +self.d + Move[2]]
+        elif near(x[0], self.p6[0]) and near(x[1], self.p6[1]) and near(x[2], self.p6[2]):
+            y[0] = x[0] - self.L
+            y[1] = x[1]
+            y[2] = x[2] - self.L
+        # p7 = [self.d + Move[0], +self.d + Move[1], +self.d + Move[2]]
+        elif near(x[0], self.p7[0]) and near(x[1], self.p7[1]) and near(x[2], self.p7[2]):
+            y[0] = x[0] - self.L
+            y[1] = x[1] - self.L
+            y[2] = x[2] - self.L
+        # p8 = [self.d + Move[0], +self.d + Move[1], -self.d + Move[2]]
+        elif near(x[0], self.p8[0]) and near(x[1], self.p8[1]) and near(x[2], self.p8[2]):
+            y[0] = x[0] - self.L
+            y[1] = x[1] - self.L
+            y[2] = x[2]
+        # (0, 0, 1.)
+
+        # Parallel Edges -------------------------------------------------------
+        # z direction or plane x - y
+        if near(x[0], self.d) and near(x[1], self.d):
+            y[0] = x[0] - self.L
+            y[1] = x[1] - self.L
+            y[2] = x[2]
+        elif near(x[0], self.d) and near(x[1], -self.d):
+            y[0] = x[0] - self.L
+            y[1] = x[1]
+            y[2] = x[2]
+        elif near(x[0], -self.d) and near(x[1], self.d):
+            y[0] = x[0]
+            y[1] = x[1] - self.L
+            y[2] = x[2]
+
+        # y direction or plane x - z
+        elif near(x[0], self.d) and near(x[2], self.d):
+            y[0] = x[0] - self.L
+            y[1] = x[1]
+            y[2] = x[2] - self.L
+        elif near(x[0], self.d) and near(x[2], -self.d):
+            y[0] = x[0] - self.L
+            y[1] = x[1]
+            y[2] = x[2]
+        elif near(x[0], -self.d) and near(x[2], self.d):
+            y[0] = x[0]
+            y[1] = x[1]
+            y[2] = x[2] - self.L
+
+        # x direction or plane y - z
+        elif near(x[1], self.d) and near(x[2], self.d):
+            y[0] = x[0]
+            y[1] = x[1] - self.L
+            y[2] = x[2] - self.L
+        elif near(x[1], self.d) and near(x[2], -self.d):
+            y[0] = x[0]
+            y[1] = x[1] - self.L
+            y[2] = x[2]
+        elif near(x[1], -self.d) and near(x[2], self.d):
+            y[0] = x[0]
+            y[1] = x[1]
+            y[2] = x[2] - self.L
+
+        # Faces ----------------------------------------------------------------
+        elif near(x[0], self.d):
+            y[0] = x[0] - self.L
+            y[1] = x[1]
+            y[2] = x[2]
+        elif near(x[1], self.d):
+            y[0] = x[0]
+            y[1] = x[1] - self.L
+            y[2] = x[2]
+        elif near(x[2], self.d):
+            y[0] = x[0]
+            y[1] = x[1]
+            y[2] = x[2] - self.L
+        # else:
+        #     y[0] = x[0]
+        #     y[1] = x[1]
+        #     y[2] = x[2]
+            
+
+# class PeriodicBoundary3D(SubDomain):
+#     def inside(self, x, on_boundary):
+#         # Node association is made in e different stages: corners, edges, faces
+#         # return True if on left or bottom or front boundary
+#         # AND NOT on every pair of slave edges
+#         # Move = [0.0, 0.0, 0.0]  # at center of coordinate system
+#         self.L = 1.0
+#         self.d = 0.5
+#         # 
+#         self.p1 = [-self.d, -self.d, -self.d]
+#         self.p2 = [-self.d, -self.d, +self.d]
+#         self.p3 = [-self.d, +self.d, +self.d]
+#         self.p4 = [-self.d, +self.d, -self.d]
+#         self.p5 = [+self.d, -self.d, -self.d]
+#         self.p6 = [+self.d, -self.d, +self.d]
+#         self.p7 = [+self.d, +self.d, +self.d]
+#         self.p8 = [+self.d, +self.d, -self.d]
+#         return bool(
+#             (near(x[0], self.p1[0]) or near(x[1], self.p1[1]) or near(x[2], self.p1[2]))
+#             and
+#             (not ((near(x[0], self.d) and near(x[2], self.d)) or 
+#                   (near(x[0], self.d) and near(x[1], self.d)) or
+#                   (near(x[1], self.d) and near(x[2], self.d)))) and on_boundary)
+#             # (not (
+#             #     # slave edges of plane x
+#             #     (near(x[0], -self.d) and near(x[1], self.d)) or
+#             #     (near(x[0], -self.d) and near(x[2], self.d)) or
+#             #     # slave edges of plane y
+#             #     (near(x[1], -self.d) and near(x[0], self.d)) or
+#             #     (near(x[1], -self.d) and near(x[2], self.d)) or
+#             #     # slave edges of plane z
+#             #     (near(x[2], -self.d) and near(x[0], self.d)) or
+#             #     (near(x[2], -self.d) and near(x[1], self.d))
+#             # )) and on_boundary)
+
+#     # Map right boundary (H) to left boundary (G)
+#     def map(self, x, y):
+#     	#### define mapping for a single point in the box, such that 3 mappings are required
+#         d = self.d
+#         if near(x[0], d) and near(x[1], d) and near(x[2], d):
+#             y[0] = x[0] - d*2
+#             y[1] = x[1] - d*2
+#             y[2] = x[2] - d*2
+#         ##### define mapping for edges in the box, such that mapping in 2 Cartesian coordinates are required
+#         if near(x[0], d) and near(x[2], d):
+#             y[0] = x[0] - d*2
+#             y[1] = x[1] 
+#             y[2] = x[2] - d*2
+#         elif near(x[1], d) and near(x[2], d):
+#             y[0] = x[0] 
+#             y[1] = x[1] - d*2
+#             y[2] = x[2] - d*2
+#         elif near(x[0], d) and near(x[1], d):
+#             y[0] = x[0] - d*2
+#             y[1] = x[1] - d*2
+#             y[2] = x[2]         
+#         #### right maps to left: left/right is defined as the x-direction
+#         elif near(x[0], d):
+#             y[0] = x[0] - d*2
+#             y[1] = x[1]
+#             y[2] = x[2]
+#         ### back maps to front: front/back is defined as the y-direction    
+#         elif near(x[1], d):
+#             y[0] = x[0]
+#             y[1] = x[1] - d*2
+#             y[2] = x[2] 
+#         #### top maps to bottom: top/bottom is defined as the z-direction        
+#         elif near(x[2], d):
+#             y[0] = x[0]
+#             y[1] = x[1]
+#             y[2] = x[2] - d*2
+# 
+    # def map(self, x, y):
+    #     # Conners --------------------------------------------------------------
+    #     # p2 = [-self.d + Move[0], -self.d + Move[1], +self.d + Move[2]]
+    #     if near(x[0], self.p2[0]) and near(x[1], self.p2[1]) and near(x[2], self.p2[2]):
+    #         y[0] = x[0]
+    #         y[1] = x[1]
+    #         y[2] = x[2] - self.L
+    #     # p3 = [-self.d + Move[0], +self.d + Move[1], +self.d + Move[2]]
+    #     elif near(x[0], self.p3[0]) and near(x[1], self.p3[1]) and near(x[2], self.p3[2]):
+    #         y[0] = x[0]
+    #         y[1] = x[1] - self.L
+    #         y[2] = x[2] - self.L
+    #     # p4 = [-self.d + Move[0], +self.d + Move[1], -self.d + Move[2]]
+    #     elif near(x[0], self.p4[0]) and near(x[1], self.p4[1]) and near(x[2], self.p4[2]):
+    #         y[0] = x[0]
+    #         y[1] = x[1] - self.L
+    #         y[2] = x[2]
+    #     # p5 = [self.d + Move[0], -self.d + Move[1], -self.d + Move[2]]
+    #     elif near(x[0], self.p5[0]) and near(x[1], self.p5[1]) and near(x[2], self.p5[2]):
+    #         y[0] = x[0] - self.L
+    #         y[1] = x[1]
+    #         y[2] = x[2]
+    #     # p6 = [self.d + Move[0], -self.d + Move[1], +self.d + Move[2]]
+    #     elif near(x[0], self.p6[0]) and near(x[1], self.p6[1]) and near(x[2], self.p6[2]):
+    #         y[0] = x[0] - self.L
+    #         y[1] = x[1]
+    #         y[2] = x[2] - self.L
+    #     # p7 = [self.d + Move[0], +self.d + Move[1], +self.d + Move[2]]
+    #     elif near(x[0], self.p7[0]) and near(x[1], self.p7[1]) and near(x[2], self.p7[2]):
+    #         y[0] = x[0] - self.L
+    #         y[1] = x[1] - self.L
+    #         y[2] = x[2] - self.L
+    #     # p8 = [self.d + Move[0], +self.d + Move[1], -self.d + Move[2]]
+    #     elif near(x[0], self.p8[0]) and near(x[1], self.p8[1]) and near(x[2], self.p8[2]):
+    #         y[0] = x[0] - self.L
+    #         y[1] = x[1] - self.L
+    #         y[2] = x[2]
+    #     # (0, 0, 1.)
+
+    #     # Parallel Edges -------------------------------------------------------
+    #     # z direction or plane x - y
+    #     elif near(x[0], self.d) and near(x[1], self.d):
+    #         y[0] = x[0] - self.L
+    #         y[1] = x[1] - self.L
+    #         y[2] = x[2]
+    #     elif near(x[0], self.d) and near(x[1], -self.d):
+    #         y[0] = x[0] - self.L
+    #         y[1] = x[1]
+    #         y[2] = x[2]
+    #     elif near(x[0], -self.d) and near(x[1], self.d):
+    #         y[0] = x[0]
+    #         y[1] = x[1] - self.L
+    #         y[2] = x[2]
+
+    #     # y direction or plane x - z
+    #     elif near(x[0], self.d) and near(x[2], self.d):
+    #         y[0] = x[0] - self.L
+    #         y[1] = x[1]
+    #         y[2] = x[2] - self.L
+    #     elif near(x[0], self.d) and near(x[2], -self.d):
+    #         y[0] = x[0] - self.L
+    #         y[1] = x[1]
+    #         y[2] = x[2]
+    #     elif near(x[0], -self.d) and near(x[2], self.d):
+    #         y[0] = x[0]
+    #         y[1] = x[1]
+    #         y[2] = x[2] - self.L
+
+    #     # x direction or plane y - z
+    #     elif near(x[1], self.d) and near(x[2], self.d):
+    #         y[0] = x[0]
+    #         y[1] = x[1] - self.L
+    #         y[2] = x[2] - self.L
+    #     elif near(x[1], self.d) and near(x[2], -self.d):
+    #         y[0] = x[0]
+    #         y[1] = x[1] - self.L
+    #         y[2] = x[2]
+    #     elif near(x[1], -self.d) and near(x[2], self.d):
+    #         y[0] = x[0]
+    #         y[1] = x[1]
+    #         y[2] = x[2] - self.L
+
+    #     # Faces ----------------------------------------------------------------
+    #     elif near(x[0], self.d):
+    #         y[0] = x[0] - self.L
+    #         y[1] = x[1]
+    #         y[2] = x[2]
+    #     elif near(x[1], self.d):
+    #         y[0] = x[0]
+    #         y[1] = x[1] - self.L
+    #         y[2] = x[2]
+    #     elif near(x[2], self.d):
+    #         y[0] = x[0]
+    #         y[1] = x[1]
+    #         y[2] = x[2] - self.L
+    #     # else:
+    #     #     y[0] = x[0]
+    #     #     y[1] = x[1]
+    #     #     y[2] = x[2]
 
 
 # In[] =========================================================================
@@ -204,7 +521,7 @@ def my_plot(
         print("Error: Missed title. Function: my_plot")
     else:
         # ax.set_title(title, fontsize=15)
-        pass    gi
+        pass
     ax.set_xlabel(xlabel, fontsize=fontsize)
     ax.set_ylabel(ylabel, fontsize=fontsize)
     ax.set_box_aspect(1)
@@ -1667,3 +1984,691 @@ def relocation_offset_text(ax, x=1, y=-0.1, size=fontsize):
                 xycoords='axes fraction',
                 size=size
                 )
+    
+class Pinpoint(SubDomain):
+    TOL = 1e-3
+
+    def __init__(self, coords):
+        self.coords = np.array(coords)
+        SubDomain.__init__(self)
+
+    def move(self, coords):
+        self.coords[:] = np.array(coords)
+
+    def inside(self, x, on_boundary):
+        return np.linalg.norm(x - self.coords) < DOLFIN_EPS
+    
+
+# ==================================================================
+# ==================================================================
+class homogenizedTensor():
+
+    # Default initialization of members
+    def __init__(self, material_properties, u11, u22, u12, **kwargs):
+        # Call the standard initialization
+        assert "subdomains" in kwargs
+        assert "boundaries" in kwargs
+        assert "mesh" in kwargs
+        self.subdomains, self.boundaries, self.mesh = (
+            kwargs["subdomains"],
+            kwargs["boundaries"],
+            kwargs["mesh"],
+        )
+        # self.u = TrialFunction(V)
+        # self.v = TestFunction(V)
+        self.dx = Measure("dx")(subdomain_data=self.subdomains)
+        self.ds = Measure("ds")(subdomain_data=self.boundaries)
+
+        # initialize the cell solutions
+        self.u11 = u11
+        self.u22 = u22
+        self.u12 = u12
+
+        # set E & nu
+        self.material_properties = material_properties
+        self.E_f = material_properties[0]  # MPa
+        self.nu_f = material_properties[1]
+        self.E_m = material_properties[2]  # MPa
+        self.nu_m = material_properties[3]
+        # self.E = [self.E_m, self.E_f]
+        # self.nu = [self.nu_m, self.nu_f]
+
+        # Lame's constants
+        # self.lambda_1 = [
+        #     self.E_f * self.nu_f / ((1.0 + self.nu_f) *
+        #                             (1.0 - 2.0 * self.nu_f)),
+        #     self.E_m * self.nu_m / ((1.0 + self.nu_m) *
+        #                             (1.0 - 2.0 * self.nu_m)),
+        # ]
+        # self.lambda_2 = [
+        #     self.E_f / (2.0 * (1.0 + self.nu_f)), \
+        #     self.E_m / (2.0 * (1.0 + self.nu_m))
+        #     ]
+
+        self.model = "plane_strain"
+        if self.model == "plane_strain":
+            # define C_ij tensor
+            self.C1111 = self.C2222 = [
+                self.E_f * (1 - self.nu_f) / ((1.0 + self.nu_f) *(1.0 - 2.0 * self.nu_f)), \
+                self.E_m * (1 - self.nu_m) / ((1.0 + self.nu_m) * (1.0 - 2.0 * self.nu_m))
+            ]
+            self.C1122 = self.C2211 = [
+                self.E_f * self.nu_f / ((1.0 + self.nu_f) * (1.0 - 2.0 * self.nu_f)),
+                self.E_m * self.nu_m / ((1.0 + self.nu_m) * (1.0 - 2.0 * self.nu_m)),
+            ]
+            self.C1212 = [
+                self.E_f / (2 * (1.0 + self.nu_f)),
+                self.E_m / (2 * (1.0 + self.nu_m))
+            ]
+        elif self.model == "plane_stress":
+            self.C1111 = self.C2222 = [
+                self.E_f / (1.0 - np.power(self.nu_f, 2)), \
+                self.E_m / (1.0 - np.power(self.nu_m, 2))
+            ]
+            self.C1122 = self.C2211 = [
+                self.E_f * self.nu_f / (1.0 - np.power(self.nu_f, 2)),
+                self.E_m * self.nu_m / (1.0 - np.power(self.nu_m, 2)),
+            ]
+            self.C1212 = [
+                self.E_f / (2 * (1.0 + self.nu_f)),
+                self.E_m / (2 * (1.0 + self.nu_m))
+            ]
+
+        # C_0 = as_matrix([
+        #     [self.C1111[0], self.C1122[0], 0.],  #
+        #     [self.C2211[0], self.C2222[0], 0.],  #
+        #     [0., 0., self.C1212[0]]
+        # ])
+        # C_1 = as_matrix([
+        #     [self.C1111[1], self.C1122[1], 0.],  #
+        #     [self.C2211[1], self.C2222[1], 0.],  #
+        #     [0., 0., self.C1212[1]]
+        # ])
+
+        # call homogenizedTensor problem
+        self.A_ij, self.E_hom, self.nu_hom = self.homogenizedTensor()
+
+    def homogenizedTensor(self):
+        # Default initialization of members
+        dx = self.dx
+        ds = self.ds
+        u11, u22, u12 = self.u11, self.u22, self.u12
+        C1111, C2222 = self.C1111, self.C2222
+        C1122, C2211 = self.C1122, self.C2211
+        C1212 = self.C1212
+        msh = self.mesh
+        # Create TensorFunctionSpace for grad of u11, u22, u12
+        V_g = TensorFunctionSpace(msh,
+                                  "Lagrange",
+                                  1,
+                                  constrained_domain=PeriodicBoundary())
+        V = FunctionSpace(msh,
+                          "Lagrange",
+                          1,
+                          constrained_domain=PeriodicBoundary())
+
+        # Calculate gradient of u11, u22, u12 ----------------------------------
+        # for w11 (or u11)
+        time_grad_u11_s = time.time()
+        grad_u11 = project(grad(u11), V_g)
+        grad_u11_1_y1, grad_u11_1_y2, grad_u11_2_y1, grad_u11_2_y2 = \
+            grad_u11.split(deepcopy=True)  # extract
+        time_grad_u11_e = time.time()
+
+        # for w22 (or u22)
+        time_grad_u22_s = time.time()
+        grad_u22 = project(grad(u22), V_g)
+        grad_u22_1_y1, grad_u22_1_y2, grad_u22_2_y1, grad_u22_2_y2 = \
+            grad_u22.split(deepcopy=True)
+        time_grad_u22_e = time.time()
+
+        # for w12 (or u12)
+        time_grad_u12_s = time.time()
+        grad_u12 = project(grad(u12), V_g)
+        grad_u12_1_y1, grad_u12_1_y2, grad_u12_2_y1, grad_u12_2_y2 = \
+            grad_u12.split(deepcopy=True)
+        time_grad_u12_e = time.time()
+
+        # ----------------------------------------------------------------------
+        """ Subtitute into equations of homogenized tensor components """
+
+        ## k = l = 1 -----------------------------------------------------------
+        time_A1111_s = time.time()
+        A1111_projected_1 = project(
+            C1111[0] - C1111[0] * grad_u11_1_y1 - C1122[0] * grad_u11_2_y2, V=V)
+        A1111_projected_2 = project(
+            C1111[1] - C1111[1] * grad_u11_1_y1 - C1122[1] * grad_u11_2_y2, V=V)
+        A1111_assembled = assemble(A1111_projected_1 * dx(1) +
+                                   A1111_projected_2 * dx(2) +
+                                   A1111_projected_2 * dx(3) +
+                                   A1111_projected_2 * dx(4) +
+                                   A1111_projected_2 * dx(5) +
+                                   A1111_projected_2 * dx(6) +
+                                   A1111_projected_2 * dx(7) +
+                                   A1111_projected_2 * dx(8) +
+                                   A1111_projected_2 * dx(9) +
+                                   A1111_projected_2 * dx(10))
+        time_A1111_e = time.time()
+
+        time_A2211_s = time.time()
+        A2211_projected_1 = project(
+            C2211[0] - C2211[0] * grad_u11_1_y1 - C2222[0] * grad_u11_2_y2, V=V)
+        A2211_projected_2 = project(
+            C2211[1] - C2211[1] * grad_u11_1_y1 - C2222[1] * grad_u11_2_y2, V=V)
+        A2211_assembled = assemble(A2211_projected_1 * dx(1) +
+                                   A2211_projected_2 * dx(2) +
+                                   A2211_projected_2 * dx(3) +
+                                   A2211_projected_2 * dx(4) +
+                                   A2211_projected_2 * dx(5) +
+                                   A2211_projected_2 * dx(6) +
+                                   A2211_projected_2 * dx(7) +
+                                   A2211_projected_2 * dx(8) +
+                                   A2211_projected_2 * dx(9) +
+                                   A2211_projected_2 * dx(10))
+        time_A2211_e = time.time()
+
+        ## k = l = 2 -----------------------------------------------------------
+        time_A1122_s = time.time()
+        A1122_projected_1 = project(
+            C1122[0] - C1111[0] * grad_u22_1_y1 - C1122[0] * grad_u22_2_y2, V=V)
+        A1122_projected_2 = project(
+            C1122[1] - C1111[1] * grad_u22_1_y1 - C1122[1] * grad_u22_2_y2, V=V)
+        A1122_assembled = assemble(A1122_projected_1 * dx(1) +
+                                   A1122_projected_2 * dx(2) +
+                                   A1122_projected_2 * dx(3) +
+                                   A1122_projected_2 * dx(4) +
+                                   A1122_projected_2 * dx(5) +
+                                   A1122_projected_2 * dx(6) +
+                                   A1122_projected_2 * dx(7) +
+                                   A1122_projected_2 * dx(8) +
+                                   A1122_projected_2 * dx(9) +
+                                   A1122_projected_2 * dx(10))
+        time_A1122_e = time.time()
+
+        time_A2222_s = time.time()
+        A2222_projected_1 = project(
+            C2222[0] - C2211[0] * grad_u22_1_y1 - C2222[0] * grad_u22_2_y2, V=V)
+        A2222_projected_2 = project(
+            C2222[1] - C2211[1] * grad_u22_1_y1 - C2222[1] * grad_u22_2_y2, V=V)
+        A2222_assembled = assemble(A2222_projected_1 * dx(1) +
+                                   A2222_projected_2 * dx(2) +
+                                   A2222_projected_2 * dx(3) +
+                                   A2222_projected_2 * dx(4) +
+                                   A2222_projected_2 * dx(5) +
+                                   A2222_projected_2 * dx(6) +
+                                   A2222_projected_2 * dx(7) +
+                                   A2222_projected_2 * dx(8) +
+                                   A2222_projected_2 * dx(9) +
+                                   A2222_projected_2 * dx(10))
+        time_A2222_e = time.time()
+
+        # k =1, l = 2 ----------------------------------------------------------
+        time_A1212_s = time.time()
+        A1212_projected_1 = project(
+            C1212[0] * (1 - grad_u12_1_y2 - grad_u12_2_y1), V=V)
+        A1212_projected_2 = project(
+            C1212[1] * (1 - grad_u12_1_y2 - grad_u12_2_y1), V=V)
+        # A1212_assembled = assemble(A1212_projected_1 * dx(1) +
+        #                            A1212_projected_2 * dx(2) +
+        #                            A1212_projected_2 * dx(3) +
+        #                            A1212_projected_2 * dx(4) +
+        #                            A1212_projected_2 * dx(5) +
+        #                            A1212_projected_2 * dx(6) +
+        #                            A1212_projected_2 * dx(7) +
+        #                            A1212_projected_2 * dx(8) +
+        #                            A1212_projected_2 * dx(9) +
+        #                            A1212_projected_2 * dx(10))
+        A1212_assembled = assemble(A1212_projected_1 * dx(1))\
+                        + assemble(A1212_projected_2 * dx(2))\
+                        + assemble(A1212_projected_2 * dx(3))\
+                        + assemble(A1212_projected_2 * dx(4))\
+                        + assemble(A1212_projected_2 * dx(5))\
+                        + assemble(A1212_projected_2 * dx(6))\
+                        + assemble(A1212_projected_2 * dx(7))\
+                        + assemble(A1212_projected_2 * dx(8))\
+                        + assemble(A1212_projected_2 * dx(9))\
+                        + assemble(A1212_projected_2 * dx(10))
+        a1 = [assemble(A1212_projected_1 * dx(i+1)) for i in range(1)]
+        a2 = [assemble(A1212_projected_2 * dx(i+1)) for i in range(1,10)]
+        print(f"assemble1: {a1}")
+        print(f"assemble2: {a2}")
+        print(f"assemble2 total: {np.sum(a2)}")
+        print(f"assemble total: {a1 + np.sum(a2)}")
+        time_A1212_e = time.time()
+        # print('The homogenized coefficient A1212: ', A1212_assembled / 1e9)
+
+        #=======================================================================
+        #=======================================================================
+        print('Computational time - calculate gradient of u11, u22, u12: ')
+        self.time_total_grad = (time_grad_u12_e - time_grad_u11_s)
+        print("""
+            time_grad_u11: {} \n
+            time_grad_u22: {} \n
+            time_grad_u12: {} \n
+            time_grad_total: {} \n
+        """.format(time_grad_u11_e - time_grad_u11_s,
+                   time_grad_u22_e - time_grad_u22_s,
+                   time_grad_u12_e - time_grad_u12_s,
+                   self.time_total_grad))
+        #=======================================================================
+        print('Computational time - homogenized coefficient: ')
+        self.time_total_assemble = (time_A1212_e - time_A1111_s)
+        print("""
+            time_A1111: {} \n
+            time_A2211: {} \n
+            time_A1122: {} \n
+            time_A2222: {} \n
+            time_A1212: {} \n
+            time_total_assemble: {} \n
+        """.format(time_A1111_e - time_A1111_s, time_A2211_e - time_A2211_s,
+                   time_A1122_e - time_A1122_s, time_A2222_e - time_A2222_s,
+                   time_A1212_e - time_A1212_s, self.time_total_assemble))
+
+        #=======================================================================
+        # The homogenized tensor
+        A_ij = np.array([
+            [A1111_assembled, A1122_assembled, 0],
+            [A2211_assembled, A2222_assembled, 0],
+            [0, 0, A1212_assembled],
+        ])
+        print("The homogenized effective coefficient tensor (GPa): \n",
+              A_ij / 1e3)
+
+        lambda_hom = A_ij[0, 1]
+        mu_hom = A_ij[2, 2]
+
+        # ----------------------------------------------------------------------
+        """ The homogenized material properties"""
+        if self.model == "plane_strain":
+            # ...
+            # ==================================================================
+            # ==================================================================
+            # E_hom = mu_hom * (3 * lambda_hom + 2 * mu_hom) / (lambda_hom + mu_hom)
+            # nu_hom = lambda_hom / (2 * (lambda_hom + 2*mu_hom))
+            E_hom = A_ij[0, 0] - 2*(A_ij[0, 1])/(A_ij[0, 0]+A_ij[0, 1])
+            nu_hom = (A_ij[0, 1])/(A_ij[0, 0]+A_ij[0, 1])
+            # References
+            # [1] Penta, R. and Gerisch, A., 2017. The asymptotic homogenization 
+            # elasticity tensor properties for composites with material discontinuities.
+            # Continuum Mechanics and Thermodynamics, 29, pp.187-206.
+            # ==================================================================
+            # Using this one, do not delete ====================================
+            # nu_hom = A1122_assembled / (A1122_assembled + A1111_assembled)
+            # E_hom = 2 * A1212_assembled * (1 + nu_hom)
+            # ==================================================================
+            # ==================================================================
+        elif self.model == "plane_stress":
+            #     # plain stress: eq reference to JinheeLee1996
+            nu_hom = A1122_assembled / A1111_assembled
+            E_hom = A1111_assembled * (1 - np.power(nu_hom, 2))
+            # E_hom = A1212_assembled * 2 * (1 + nu_hom)
+
+        # self.inv_A_ij = np.linalg.inv(A_ij)
+        # E_hom = 1 / self.inv_A_ij[0, 0]
+        # nu_hom = -self.inv_A_ij[1, 0] * E_hom
+
+        # E_hom = np.round(E_hom / 1e3, 2)
+        # nu_hom = np.round(nu_hom, 2)
+        # print(f"E_hom: {E_hom} (GPa)")
+        # print(f"nu_hom: {nu_hom}")
+
+        print(f"E_hom: {E_hom} (MPa)")
+        print(f"nu_hom: {nu_hom}")
+        return A_ij, E_hom, nu_hom
+
+
+class homogenizedTensor3D():
+    """
+    Homogenized tensor for 3D without pre-computed gradients of correctors
+    """
+    # Default initialization of members
+    def __init__(self, material_properties, u11, u22, u33, u12, u13, u23, n_subs=10, **kwargs):
+        """
+        n_subs: number of subdomains
+        """
+        # Call the standard initialization
+        assert "subdomains" in kwargs
+        assert "boundaries" in kwargs
+        assert "mesh" in kwargs
+        self.subdomains, self.boundaries, self.mesh = (
+            kwargs["subdomains"],
+            kwargs["boundaries"],
+            kwargs["mesh"],
+        )
+        # self.u = TrialFunction(V)
+        # self.v = TestFunction(V)
+        self.dx = Measure("dx")(subdomain_data=self.subdomains)
+        self.ds = Measure("ds")(subdomain_data=self.boundaries)
+
+        # initialize the cell solutions
+        self.u11 = u11
+        self.u22 = u22
+        self.u33 = u33
+        self.u12 = u12
+        self.u13 = u13
+        self.u23 = u23
+
+        # set E & nu
+        self.material_properties = material_properties
+        self.E_f = material_properties[0]  # MPa
+        self.nu_f = material_properties[1]
+        self.E_m = material_properties[2]  # MPa
+        self.nu_m = material_properties[3]
+        # self.E = [self.E_m, self.E_f]
+        # self.nu = [self.nu_m, self.nu_f]
+
+        # Lame's constants
+        # self.lambda_1 = [
+        #     self.E_f * self.nu_f / ((1.0 + self.nu_f) *
+        #                             (1.0 - 2.0 * self.nu_f)),
+        #     self.E_m * self.nu_m / ((1.0 + self.nu_m) *
+        #                             (1.0 - 2.0 * self.nu_m)),
+        # ]
+        # self.lambda_2 = [
+        #     self.E_f / (2.0 * (1.0 + self.nu_f)), \
+        #     self.E_m / (2.0 * (1.0 + self.nu_m))
+        #     ]
+
+        self.model = "plane_strain"
+        if self.model == "plane_strain":
+            # define C_ij tensor
+            self.C1111 = self.C2222 = [
+                self.E_f * (1 - self.nu_f) / ((1.0 + self.nu_f) *(1.0 - 2.0 * self.nu_f)), \
+                self.E_m * (1 - self.nu_m) / ((1.0 + self.nu_m) * (1.0 - 2.0 * self.nu_m))
+            ]
+            self.C1122 = self.C2211 = [
+                self.E_f * self.nu_f / ((1.0 + self.nu_f) * (1.0 - 2.0 * self.nu_f)),
+                self.E_m * self.nu_m / ((1.0 + self.nu_m) * (1.0 - 2.0 * self.nu_m)),
+            ]
+            self.C1212 = [
+                self.E_f / (2 * (1.0 + self.nu_f)),
+                self.E_m / (2 * (1.0 + self.nu_m))
+            ]
+        elif self.model == "plane_stress":
+            self.C1111 = self.C2222 = [
+                self.E_f / (1.0 - np.power(self.nu_f, 2)), \
+                self.E_m / (1.0 - np.power(self.nu_m, 2))
+            ]
+            self.C1122 = self.C2211 = [
+                self.E_f * self.nu_f / (1.0 - np.power(self.nu_f, 2)),
+                self.E_m * self.nu_m / (1.0 - np.power(self.nu_m, 2)),
+            ]
+            self.C1212 = [
+                self.E_f / (2 * (1.0 + self.nu_f)),
+                self.E_m / (2 * (1.0 + self.nu_m))
+            ]
+
+        # C_0 = as_matrix([
+        #     [self.C1111[0], self.C1122[0], 0.],  #
+        #     [self.C2211[0], self.C2222[0], 0.],  #
+        #     [0., 0., self.C1212[0]]
+        # ])
+        # C_1 = as_matrix([
+        #     [self.C1111[1], self.C1122[1], 0.],  #
+        #     [self.C2211[1], self.C2222[1], 0.],  #
+        #     [0., 0., self.C1212[1]]
+        # ])
+
+        # call homogenizedTensor problem
+        self.A_ij, self.E_hom, self.nu_hom = self.homogenizedTensor()
+
+    def homogenizedTensor(self):
+        # Default initialization of members
+        dx = self.dx
+        ds = self.ds
+        u11, u22, u12 = self.u11, self.u22, self.u12
+        C1111, C2222 = self.C1111, self.C2222
+        C1122, C2211 = self.C1122, self.C2211
+        C1212 = self.C1212
+        msh = self.mesh
+        # Create TensorFunctionSpace for grad of u11, u22, u12
+        V_g = TensorFunctionSpace(msh,
+                                  "Lagrange",
+                                  1,
+                                  constrained_domain=PeriodicBoundary())
+        V = FunctionSpace(msh,
+                          "Lagrange",
+                          1,
+                          constrained_domain=PeriodicBoundary())
+
+        # Calculate gradient of u11, u22, u12 ----------------------------------
+        # for w11 (or u11)
+        time_grad_u11_s = time.time()
+        grad_u11 = project(grad(u11), V_g)
+        grad_u11_1_y1, grad_u11_1_y2, grad_u11_1_y3, \
+            grad_u11_2_y1, grad_u11_2_y2, grad_u11_2_y3, \
+            grad_u11_3_y1, grad_u11_3_y2, grad_u11_3_y3 = grad_u11.split(deepcopy=True) # extract
+        time_grad_u11_e = time.time()
+
+        # for w22 (or u22)
+        time_grad_u22_s = time.time()
+        grad_u22 = project(grad(u22), V_g)
+        grad_u22_1_y1, grad_u22_1_y2, grad_u22_1_y3,\
+            grad_u22_2_y1, grad_u22_2_y2, grad_u22_2_y3,\
+            grad_u22_3_y1, grad_u22_3_y2, grad_u22_3_y3 = grad_u22.split(deepcopy=True)
+        time_grad_u22_e = time.time()
+
+        # for w33 (or u12)
+        time_grad_u33_s = time.time()
+        grad_u33 = project(grad(u33), V_g)
+        grad_u33_1_y1, grad_u33_1_y2, grad_u33_2_y1, grad_u33_2_y2 = \
+            grad_u33.split(deepcopy=True)
+        time_grad_u33_e = time.time()
+
+        # for w12 (or u12)
+        time_grad_u12_s = time.time()
+        grad_u12 = project(grad(u12), V_g)
+        grad_u12_1_y1, grad_u12_1_y2, grad_u12_2_y1, grad_u12_2_y2 = \
+            grad_u12.split(deepcopy=True)
+        time_grad_u12_e = time.time()
+
+        # for w13 (or u13)
+        time_grad_u13_s = time.time()
+        grad_u13 = project(grad(u13), V_g)
+        grad_u13_1_y1, grad_u13_1_y2, grad_u13_2_y1, grad_u13_2_y2 = \
+            grad_u13.split(deepcopy=True)
+        time_grad_u13_e = time.time()
+
+        # for w23 (or u23)
+        time_grad_u23_s = time.time()
+        grad_u23 = project(grad(u23), V_g)
+        grad_u23_1_y1, grad_u23_1_y2, grad_u23_1_y3,\
+            grad_u23_2_y1, grad_u23_2_y2, grad_u23_2_y3,\
+            grad_u23_3_y1, grad_u23_3_y2, grad_u23_3_y3 = grad_u23.split(deepcopy=True)
+        time_grad_u23_e = time.time()
+
+        # ----------------------------------------------------------------------
+        """ Subtitute into equations of homogenized tensor components """
+
+        ## k = l = 1 -----------------------------------------------------------
+        time_A1111_s = time.time()
+        A1111_projected_1 = project(
+            C1111[0] - C1111[0] * grad_u11_1_y1 - C1122[0] * grad_u11_2_y2, V=V)
+        A1111_projected_2 = project(
+            C1111[1] - C1111[1] * grad_u11_1_y1 - C1122[1] * grad_u11_2_y2, V=V)
+        A1111_assembled = assemble(A1111_projected_1 * dx(1) +
+                                   sum([A1111_projected_2 * dx(i+1) for i in range(1, self.n_subs)]))
+                                #    A1111_projected_2 * dx(2) +
+                                #    A1111_projected_2 * dx(3) +
+                                #    A1111_projected_2 * dx(4) +
+                                #    A1111_projected_2 * dx(5) +
+                                #    A1111_projected_2 * dx(6) +
+                                #    A1111_projected_2 * dx(7) +
+                                #    A1111_projected_2 * dx(8) +
+                                #    A1111_projected_2 * dx(9) +
+                                #    A1111_projected_2 * dx(10)
+        time_A1111_e = time.time()
+
+        time_A2211_s = time.time()
+        A2211_projected_1 = project(
+            C2211[0] - C2211[0] * grad_u11_1_y1 - C2222[0] * grad_u11_2_y2, V=V)
+        A2211_projected_2 = project(
+            C2211[1] - C2211[1] * grad_u11_1_y1 - C2222[1] * grad_u11_2_y2, V=V)
+        A2211_assembled = assemble(A2211_projected_1 * dx(1) +
+                                   A2211_projected_2 * dx(2) +
+                                   A2211_projected_2 * dx(3) +
+                                   A2211_projected_2 * dx(4) +
+                                   A2211_projected_2 * dx(5) +
+                                   A2211_projected_2 * dx(6) +
+                                   A2211_projected_2 * dx(7) +
+                                   A2211_projected_2 * dx(8) +
+                                   A2211_projected_2 * dx(9) +
+                                   A2211_projected_2 * dx(10))
+        time_A2211_e = time.time()
+
+        ## k = 3 = 1 -----------------------------------------------------------
+        A3311_projected_1 = project(
+            C3311[0] - C3311[0] * grad_u11_1_y1 - C3322[0] * grad_u11_2_y2 - C3333[0] * grad_u11_3_y3, V=V)
+        A3311_projected_2 = project(
+            C3311 - C3311 * grad_u11_1_y1 - C3322 * grad_u11_2_y2 - C3333 * grad_u11_3_y3,, V=V)
+        A3311_assembled = assemble(A3311_projected_1 * dx(1) +
+                                   A3311_projected_2 * dx(2) +
+                                   A3311_projected_2 * dx(3) +
+                                   A3311_projected_2 * dx(4) +
+                                   A3311_projected_2 * dx(5) +
+                                   A3311_projected_2 * dx(6) +
+                                   A3311_projected_2 * dx(7) +
+                                   A3311_projected_2 * dx(8) +
+                                   A3311_projected_2 * dx(9) +
+                                   A3311_projected_2 * dx(10))
+
+        ## k = l = 2 -----------------------------------------------------------
+        time_A1122_s = time.time()
+        A1122_projected_1 = project(
+            C1122[0] - C1111[0] * grad_u22_1_y1 - C1122[0] * grad_u22_2_y2, V=V)
+        A1122_projected_2 = project(
+            C1122[1] - C1111[1] * grad_u22_1_y1 - C1122[1] * grad_u22_2_y2, V=V)
+        A1122_assembled = assemble(A1122_projected_1 * dx(1) +
+                                   A1122_projected_2 * dx(2) +
+                                   A1122_projected_2 * dx(3) +
+                                   A1122_projected_2 * dx(4) +
+                                   A1122_projected_2 * dx(5) +
+                                   A1122_projected_2 * dx(6) +
+                                   A1122_projected_2 * dx(7) +
+                                   A1122_projected_2 * dx(8) +
+                                   A1122_projected_2 * dx(9) +
+                                   A1122_projected_2 * dx(10))
+        time_A1122_e = time.time()
+
+        time_A2222_s = time.time()
+        A2222_projected_1 = project(
+            C2222[0] - C2211[0] * grad_u22_1_y1 - C2222[0] * grad_u22_2_y2, V=V)
+        A2222_projected_2 = project(
+            C2222[1] - C2211[1] * grad_u22_1_y1 - C2222[1] * grad_u22_2_y2, V=V)
+        A2222_assembled = assemble(A2222_projected_1 * dx(1) +
+                                   A2222_projected_2 * dx(2) +
+                                   A2222_projected_2 * dx(3) +
+                                   A2222_projected_2 * dx(4) +
+                                   A2222_projected_2 * dx(5) +
+                                   A2222_projected_2 * dx(6) +
+                                   A2222_projected_2 * dx(7) +
+                                   A2222_projected_2 * dx(8) +
+                                   A2222_projected_2 * dx(9) +
+                                   A2222_projected_2 * dx(10))
+        time_A2222_e = time.time()
+
+        #=======================================================================
+        # k =1, l = 2 ----------------------------------------------------------
+        time_A1212_s = time.time()
+        A1212_projected_1 = project(
+            C1212[0] * (1 - grad_u12_1_y2 - grad_u12_2_y1), V=V)
+        A1212_projected_2 = project(
+            C1212[1] * (1 - grad_u12_1_y2 - grad_u12_2_y1), V=V)
+        A1212_assembled = assemble(A1212_projected_1 * dx(1) +
+                                   A1212_projected_2 * dx(2) +
+                                   A1212_projected_2 * dx(3) +
+                                   A1212_projected_2 * dx(4) +
+                                   A1212_projected_2 * dx(5) +
+                                   A1212_projected_2 * dx(6) +
+                                   A1212_projected_2 * dx(7) +
+                                   A1212_projected_2 * dx(8) +
+                                   A1212_projected_2 * dx(9) +
+                                   A1212_projected_2 * dx(10))
+        a1 = [assemble(A1212_projected_1 * dx(i+1)) for i in range(1)]
+        a2 = [assemble(A1212_projected_2 * dx(i+1)) for i in range(1,10)]
+        print(f"assemble1: {a1}")
+        print(f"assemble2: {a2}")
+        print(f"assemble2 total: {np.sum(a2)}")
+        print(f"assemble total: {a1 + np.sum(a2)}")
+        time_A1212_e = time.time()
+        # print('The homogenized coefficient A1212: ', A1212_assembled / 1e9)
+
+        #=======================================================================
+        #=======================================================================
+        print('Computational time - calculate gradient of u11, u22, u12: ')
+        self.time_total_grad = (time_grad_u12_e - time_grad_u11_s)
+        print("""
+            time_grad_u11: {} \n
+            time_grad_u22: {} \n
+            time_grad_u12: {} \n
+            time_grad_total: {} \n
+        """.format(time_grad_u11_e - time_grad_u11_s,
+                   time_grad_u22_e - time_grad_u22_s,
+                   time_grad_u12_e - time_grad_u12_s,
+                   self.time_total_grad))
+        #=======================================================================
+        print('Computational time - homogenized coefficient: ')
+        self.time_total_assemble = (time_A1212_e - time_A1111_s)
+        print("""
+            time_A1111: {} \n
+            time_A2211: {} \n
+            time_A1122: {} \n
+            time_A2222: {} \n
+            time_A1212: {} \n
+            time_total_assemble: {} \n
+        """.format(time_A1111_e - time_A1111_s, time_A2211_e - time_A2211_s,
+                   time_A1122_e - time_A1122_s, time_A2222_e - time_A2222_s,
+                   time_A1212_e - time_A1212_s, self.time_total_assemble))
+
+        #=======================================================================
+        # The homogenized tensor
+        A_ij = np.array([
+            [A1111_assembled, A1122_assembled, 0],
+            [A2211_assembled, A2222_assembled, 0],
+            [0, 0, A1212_assembled],
+        ])
+        print("The homogenized effective coefficient tensor (GPa): \n",
+              A_ij / 1e3)
+
+        lambda_hom = A_ij[0, 1]
+        mu_hom = A_ij[2, 2]
+
+        # ----------------------------------------------------------------------
+        """ The homogenized material properties"""
+        if self.model == "plane_strain":
+            # ...
+            # ==================================================================
+            # ==================================================================
+            # E_hom = mu_hom * (3 * lambda_hom + 2 * mu_hom) / (lambda_hom + mu_hom)
+            # nu_hom = lambda_hom / (2 * (lambda_hom + 2*mu_hom))
+            E_hom = A_ij[0, 0] - 2*(A_ij[0, 1])/(A_ij[0, 0]+A_ij[0, 1])
+            nu_hom = (A_ij[0, 1])/(A_ij[0, 0]+A_ij[0, 1])
+            # References
+            # [1] Penta, R. and Gerisch, A., 2017. The asymptotic homogenization 
+            # elasticity tensor properties for composites with material discontinuities.
+            # Continuum Mechanics and Thermodynamics, 29, pp.187-206.
+            # ==================================================================
+            # Using this one, do not delete ====================================
+            # nu_hom = A1122_assembled / (A1122_assembled + A1111_assembled)
+            # E_hom = 2 * A1212_assembled * (1 + nu_hom)
+            # ==================================================================
+            # ==================================================================
+        elif self.model == "plane_stress":
+            #     # plain stress: eq reference to JinheeLee1996
+            nu_hom = A1122_assembled / A1111_assembled
+            E_hom = A1111_assembled * (1 - np.power(nu_hom, 2))
+            # E_hom = A1212_assembled * 2 * (1 + nu_hom)
+
+        # self.inv_A_ij = np.linalg.inv(A_ij)
+        # E_hom = 1 / self.inv_A_ij[0, 0]
+        # nu_hom = -self.inv_A_ij[1, 0] * E_hom
+
+        # E_hom = np.round(E_hom / 1e3, 2)
+        # nu_hom = np.round(nu_hom, 2)
+        # print(f"E_hom: {E_hom} (GPa)")
+        # print(f"nu_hom: {nu_hom}")
+
+        print(f"E_hom: {E_hom} (MPa)")
+        print(f"nu_hom: {nu_hom}")
+        return A_ij, E_hom, nu_hom
+# %%
