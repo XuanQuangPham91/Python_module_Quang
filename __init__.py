@@ -102,3 +102,13 @@ try:
     )
 except:
     print('Failed to import Homogenization_module.LatinHyperCube_sampling')
+
+try:
+    from Python_module_Quang.Homogenization_module.homogenizedTensor import (
+        # Function =============================================================
+        # Class ================================================================
+        homogenizedTensor,
+        homogenizedTensor3D
+    )
+except:
+    print('Failed to import Homogenization_module.homogenizedTensor')
