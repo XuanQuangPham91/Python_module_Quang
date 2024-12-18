@@ -53,6 +53,7 @@ try:
         plot_convergence,
         plot_XY,
         plot_comparison,
+        convert_svg_to_emf,
         # plot_general  # has been replace by plot_XY
     )
 except:
@@ -81,6 +82,7 @@ try:
         manual_error_analysis,
         basis_function_grad,
         relocation_offset_text,
+        convert_svg_to_emf,
         # Class ================================================================
         Logger,
         PeriodicBoundary,

@@ -7,6 +7,8 @@ import matplotlib as mpl
 from numpy.lib.npyio import loadtxt
 # import numpy as np
 # import math
+import subprocess
+import os 
 
 sty = 'default'  # "seaborn", "default"
 mpl.style.use(sty)
@@ -396,6 +398,13 @@ def plot_XY(title,
     plt.savefig('solution/%s.%s' % (title, format), format=format)
     # fig.savefig(fig_path, bbox_inches='tight', dpi=400)
     # plt.close()
+
+
+def convert_svg_to_emf(fig1, fig_path):
+    fig_path = os.path.join(os.getcwd(), fig_path)
+    fig1.savefig(f'{fig_path}.svg', format='svg', bbox_inches='tight', pad_inches=0.1, dpi=600)
+    subprocess.run(["inkscape", f"{fig_path}.svg", '-M', f"{fig_path}.emf"])
+    os.remove(f"{fig_path}.svg")
 
 
 # ------------------------------------------------------------------------------
